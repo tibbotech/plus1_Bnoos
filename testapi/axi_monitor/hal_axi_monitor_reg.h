@@ -40,7 +40,7 @@ typedef volatile struct reg_axi_monitor_s
             u32 :16;
         } bits;
         u32 reg_v;
-    } ;                                  /* group 599.2  */
+    } timeout_cycle_config;                                  /* group 599.2  */
 
     union {
         struct {
