@@ -93,7 +93,7 @@ void wreg_r(UINT32 group, UINT32 index, UINT32 value)
 {
 	UINT32 *base;
 	// if (group >= 0 && group < 512)
-	base = (UINT32 *)(RGST_BASE + group * 128 + index);
+	base = (UINT32 *)((unsigned int)RGST_BASE + group*128 + index*4);
 
 	printf("wreg base addr 0x%x\n",base);
 	*base = value;
