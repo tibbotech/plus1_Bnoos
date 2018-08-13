@@ -200,7 +200,7 @@ static void _noc(int argc, char *argv[])
 
 extern void qch_host_test(int test_id);
 extern void qch_device_lead_test(int test_id);
-
+extern void qch_test_iop(int test_id);
 
 static void _qchannel(int argc, char *argv[])
 {
@@ -223,6 +223,8 @@ static void _qchannel(int argc, char *argv[])
 		qch_host_test(test_id);
 	} else if (strncmp(cmd, "devld", cmd_len) == 0) {
 		qch_device_lead_test(test_id);
+	} else if (strncmp(cmd, "iop", cmd_len) == 0) {
+		qch_test_iop(test_id);
 	} else {
 		printf("Unknown command.\n");
 	}

@@ -62,6 +62,7 @@ void timer3_callback(void)
 	g_repeat_cnt++;
 }
 
+extern void qch_timer_callback(void);
 
 void timer_test_init()
 {
@@ -70,7 +71,11 @@ void timer_test_init()
 	memcpy(timer3_opt.dev_name, "Timer3", strlen("Timer3"));
 	timer3_opt.vector = 154;
 	timer3_opt.device_config = timer3_isr_cfg;
+#ifdef QCH_TEST
+	timer3_opt.interrupt_handler = qch_timer_callback;
+#else
 	timer3_opt.interrupt_handler = timer3_callback;
+#endif
 	interrupt_register(&timer3_opt);
 
 }

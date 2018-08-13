@@ -148,7 +148,7 @@ void axi_mon_unexcept_access_test()
 
 void axi_mon_timeout_test(unsigned int timeout_cnt)
 {
-	unsigned int *p = CBDMA0_SRAM_ADDRESS;
+	unsigned int *p = (unsigned int *) CBDMA0_SRAM_ADDRESS;
 
 	reg_axi_monitor_t *axi = axi_monitor_regs;
 	reg_axi_monitor_sub_t *axi_cbdma0 = axi_mon_sub_cbdma0_regs;

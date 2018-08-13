@@ -193,7 +193,7 @@ void cbdma1_isr_cfg()
 }
 
 
-static int g_cbmda_finished = 0;
+int g_cbmda_finished = 0;
 
 void cbdma0_isr(void)
 {
@@ -234,10 +234,10 @@ void cbdma_test_init()
 }
 
 
-#define CBDMA_TEST_SOURCE      ((void *) 0x0400000)
-#define CBDMA_TEST_DESTINATION ((void *) 0x0500000)
+#define CBDMA_TEST_SOURCE      ((void *) 0x00400000)
+#define CBDMA_TEST_DESTINATION ((void *) 0x00C00000)
 // #define CBDMA_TEST_SIZE        (128 << 10)
-#define CBDMA_TEST_SIZE        (1 << 20)
+#define CBDMA_TEST_SIZE        (8 << 20)
 
 
 void cbdma_test()

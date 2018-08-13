@@ -78,6 +78,10 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.data)
+		. = ALIGN(32);
+		__iop_code_start_addr__ = .;
+		*(.iop_bin*)
+		__iop_code_end_addr__ = .;
 	} > sram
 
 	.bss :

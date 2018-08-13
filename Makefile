@@ -13,7 +13,7 @@ CFLAGS += -fno-builtin
 CFLAGS += -nodefaultlibs
 CFALGS += -ffunction-sections -fdata-sections -flto
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable -Wno-implicit-function-declaration
-CFLAGS += -Iinclude -Iinclude/util -g
+CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
 
 #-mthumb -mthumb-interwork
 
@@ -45,12 +45,12 @@ ifeq "$(NOC_TEST)" "ENABLE"
 	CSOURCES += $(wildcard $(TEST_NOC)/*.c)
 endif
 
-# QCH_TEST = ENABLE
+QCH_TEST = ENABLE
 ifeq "$(QCH_TEST)" "ENABLE"
-	CFLAGS += -DQCH_TEST
-	# noc test
 	TEST_QCH = $(TESTAPI)/qch
+	CFLAGS += -DQCH_TEST
 	CSOURCES += $(wildcard $(TEST_QCH)/*.c)
+	ASOURCES += $(wildcard $(TEST_QCH)/*.S)
 endif
 
 
@@ -78,6 +78,7 @@ $(TARGET): $(OBJS)
 	@sz=`du -sb bin/$@.img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
 	bash ./script/update_all.sh $(SPI_ALL)
 
+testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
 	@$(CROSS)gcc $(CFLAGS) -c -o $@ $<
 

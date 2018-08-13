@@ -15,12 +15,11 @@
  * ======================================================
  * 0.1  2017/09/12    nz.lu          initial version
  */
-#include <emuio.h>
-#include <string.h>
-#include "sp_interrupt.h"
 
-#include "regmap_8388_all.h"
-#include "iop_car.inc"
+#include "common_all.h"
+#include <string.h>
+
+#include "hal_iop_reg.h"
 
 
 #define TICKS	(4500-1)	/* 50ms */
@@ -30,76 +29,47 @@
 #define ON	(1)
 #define OFF	(0)
 
-#define REG_BASE	(0x9c000000)
 #define RF_GRP(_grp, _reg) ((((_grp) * 32 + (_reg)) * 4) + REG_BASE)
 
-#define CBDMA0_REG	((volatile struct cbdma_regs *)RF_GRP(26, 0))
-#define CBDMA1_REG	((volatile struct cbdma_regs *)RF_GRP(27, 0))
+#define CBDMA_TEST_SOURCE      ((void *) 0x00400000)
+#define CBDMA_TEST_DESTINATION ((void *) 0x00C00000)
+// #define CBDMA_TEST_SIZE        (128 << 10)
+#define CBDMA_TEST_SIZE        (8 << 20)
 
-#define TEST_SIZE				(8 << 20)
-#define CBDMA_TEST_SOURCE		(0x0600000)
-#define CBDMA_TEST_DESTINATION	(CBDMA_TEST_SOURCE + TEST_SIZE)
+#define CBDMA0_SRAM_ADDRESS (0x9E800000) // 40KB
+#define CBDMA1_SRAM_ADDRESS (0x9E820000) // 4KB
 
-#define CBDMA0_SRAM_BASE ((unsigned char *) 0x9E800000)	// 0x9e800000~0x9e81ffff 64KB)
-#define BOOT_ROM_BASE ((unsigned char *) 0xFFFF0000)
+#define INTERNAL_BOOT_ROM_ADDRESS (0x9E000000) // 1MB
 
-#define TIMER3_TICKS		(90 - 1)		/* 1ms */
-#define TIMER3_CONFIG_STC	(1 << 2)	/* src: stc */
-#define TIMER3_RELOAD		(1 << 1)	/* timer3 auto reload */
-#define TIMER3_RUN 			(1 << 0)	/* timer3 run */
-#define TIMER3_STOP			(0 << 0)	/* timer3 stop */
 
 unsigned int is_cbdma0_done = FALSE;
 unsigned int clock_flipflop = 0;
 unsigned int flipflop_cnt = 0;
 unsigned int cbdma_clock_onoff = FALSE;
 
-interrupt_operition timer3_intr_cfg;
-interrupt_operition cbdma0_intr_cfg;
+// i137
+// #define DENY   (1 << 3)
+// #define ACTIVE (1 << 2)
+// #define ACCEPT (1 << 1)
+
+#define nQCLKEN (1 << 5)
+#define QRESET  (1 << 4)
+
+#define REQUEST (1 << 3)
+#define DENY    (1 << 2)
+#define ACTIVE  (1 << 1)
+#define ACCEPT  (1 << 0)
 
 
-void timer_intr_onoff(int onoff)
-{
-	if (onoff == ENABLE) {
-		/* enable timer0 interrupt */
-		hal_interrupt_unmask(154);
-	} else {
-		hal_interrupt_mask(154);
-	}
-}
-
-
-void cbdma0_intr_onoff(int onoff)
-{
-	if (onoff == ENABLE) {
-		hal_interrupt_unmask(128);
-	} else {
-		hal_interrupt_mask(128);
-	}
-}
-
-enum enum_qchannel_id {
-	QCHANNEL_ID_DISPLAY_DATA_FETCH = 0,
-	QCHANNEL_ID_BOOT_ROM,
-	QCHANNEL_ID_CBDMA0,
-	QCHANNEL_ID_MAX
-};
-
-#define ACCEPT (1 << 1)
-#define ACTIVE (1 << 2)
-#define DENY   (1 << 3)
-
-const unsigned int qchannel_offset_list[QCHANNEL_ID_MAX] = {15, 16, 17};
 
 int __attribute__((optimize("O0"))) qch_access_protect_routine(unsigned int qid,unsigned int onoff)
 {
-	volatile struct moon1_regs *moon1 = MOON1_REG;
-	unsigned int offset = qchannel_offset_list[qid];
+	volatile unsigned int *qch = (unsigned int *)RF_GRP(30, 2);
+	int retry_cnt = 100, err_code = -1;
 	unsigned int status;
-	int retry_cnt = 200, err_code = -1;
 
 	if (onoff == ON) {
-		moon1->sft_cfg[offset] = 1;
+		*qch = RF_MASK_V_SET(REQUEST);
 		/**
 		 * wait until accept bit == 1
 		 * |         | ACCEPT | DENY |
@@ -109,19 +79,19 @@ int __attribute__((optimize("O0"))) qch_access_protect_routine(unsigned int qid,
 		 * | Fail    |      0 |    1 |
 		 */
 		while (retry_cnt-- > 0) {
-			status = moon1->sft_cfg[offset];
+			status = *qch;
 			if ((status & ACCEPT) != 0) {
-				printf("Accept. 0x%x\n", moon1->sft_cfg[offset]);
+				printf("Accept, 0x%x\n", status & 0xF);
 				err_code = 0;
 				break;
 			}
 			if ((status & DENY) != 0) {
-				printf("Deny. 0x%x\n", moon1->sft_cfg[offset]);
+				printf("Deny\n");
 				break;
 			}
 		}
 	} else {
-		moon1->sft_cfg[offset] = 0;
+		*qch = RF_MASK_V_CLR(REQUEST);
 		/**
 		 * wait until accept bit == 0
 		 * |         | ACCEPT | DENY |
@@ -131,25 +101,25 @@ int __attribute__((optimize("O0"))) qch_access_protect_routine(unsigned int qid,
 		 * | Fail    |      0 |    1 |
 		 */
 		while (retry_cnt-- > 0) {
-			status = moon1->sft_cfg[offset];
+			status = *qch;
 			if ((status & ACCEPT) == 0) {
-				printf("Accept. 0x%x\n", moon1->sft_cfg[offset]);
+				printf("Accept\n");
 				err_code = 0;
 				break;
 			}
 			if ((status & DENY) != 0) {
-				printf("Deny. 0x%x\n", moon1->sft_cfg[offset]);
+				printf("Deny\n");
 				break;
 			}
 		}
 	}
 
 	if (retry_cnt <= 0) {
-		printf("Wait ACCEPT timeout. 0x%x\n", moon1->sft_cfg[offset]);
+		printf("Wait ACCEPT timeout. 0x%x\n", *qch);
 	}
 
 	if (err_code != 0) {
-		moon1->sft_cfg[offset] = (onoff == ON) ? 0: 1;
+		*qch = (onoff == ON) ? RF_MASK_V_CLR(REQUEST): RF_MASK_V_SET(REQUEST);
 	}
 
 	return err_code;
@@ -165,16 +135,18 @@ void qch_timer_callback(void)
 	if (cbdma_clock_onoff == TRUE) {
 		if (clock_flipflop) {
 			printf("@on (%d)\n", flipflop_cnt);
-			moon0->clken[1] |= 1;
-			rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, ON);
+
+			// moon0->clken[2] = 0xFFFFFFFF;
+			rtn = qch_access_protect_routine(0, ON);
 			if (rtn != 0) {
-				moon0->clken[1] &= 0xFFFFFFFE;
+				// disabled cbdma 0
+				// moon0->clken[2] = 0xFFFFFFFE;
 			}
 		} else {
 			printf("@off(%d)\n", flipflop_cnt);
-			rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, OFF);
+			rtn = qch_access_protect_routine(0, OFF);
 			if (rtn == 0) {
-				moon0->clken[1] &= 0xFFFFFFFE;
+				// moon0->clken[2] &= 0xFFFFFFFE;
 				flipflop_cnt++;
 			}
 		}
@@ -185,181 +157,89 @@ void qch_timer_callback(void)
 }
 
 
-void cbdma_cfg_memcpy(int id, void *dst, void *src, unsigned int length)
-{
-	printf("[CBDMA:%d]: Copy %d KB from 0x%08x to 0x%08x\n", id, length>>10, (unsigned) src, (unsigned)dst);
-	volatile struct cbdma_regs *cbdma;
-	if (id)
-		cbdma = CBDMA1_REG;
-	else
-		cbdma = CBDMA0_REG;
-
-	// clear all int status
-	cbdma->cbdma_int_status = 0x7f;
-	// set copy mode
-	cbdma->cbdma_config = 0x00030003;
-	// set write data length
-	cbdma->cbdma_dma_length = length;
-	cbdma->cbdma_src_adr = (unsigned) src;
-	cbdma->cbdma_des_adr = (unsigned) dst;
-}
-
-
-void cbdma_cfg_memset(int id, void *dst, unsigned length)
-{
-	volatile struct cbdma_regs *cbdma;
-	if (id)
-		cbdma = CBDMA1_REG;
-	else
-		cbdma = CBDMA0_REG;
-
-	// clear all int status
-	cbdma->cbdma_int_status = 0x7f;
-	// set memset mode
-	cbdma->cbdma_config = 0x00030000;
-	// set write data length
-	cbdma->cbdma_dma_length = length;
-	cbdma->cbdma_src_adr = 0;
-	cbdma->cbdma_des_adr = (unsigned) dst;
-}
-
-
-void cbdma_enable_int(int id)
-{
-	volatile struct cbdma_regs *cbdma;
-	if (id)
-		cbdma = CBDMA1_REG;
-	else
-		cbdma = CBDMA0_REG;
-	cbdma->cbdma_int_en = 1;
-}
-
-
-void cbdma0_isr(void)
-{
-	hal_interrupt_acknowledge(128);
-
-	printf("[CBDMA_%d]: Finished, status: 0x%x\n", 0, cbdma_get_int_status(0));
-	cbdma_clear_int_status(0);
-	is_cbdma0_done = TRUE;
-}
-
-
-void timer3_isr_cfg()
-{
-	printf("[CFG] Timer3\n");
-	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD | TIMER3_RUN;
-	STC_REG->timer3_pres_val = 0;
-	STC_REG->timer3_reload = TIMER3_TICKS;
-	STC_REG->timer3_cnt = TIMER3_TICKS;
-	hal_interrupt_configure(154, 0, 1);
-}
-
-
-void cbdma0_isr_cfg()
-{
-	printf("[CFG] CBDMA0 ISR\n");
-	cbdma_clear_int_status(0);
-	cbdma_enable_int(0);
-	hal_interrupt_configure(128, 0, 1);
-	hal_interrupt_acknowledge(128);
-}
-
+extern const void *__iop_code_start_addr__;
+extern const void *__iop_code_end_addr__;
 
 void qch_initial_settings()
 {
-	MOON1_REG->sft_cfg[13] = 0x01afffff;	//set sdramA size [22:21], 00:128MB, 01:256MB, 10:512MB, 11:1024MB
+	// MOON1_REG->sft_cfg[13] = 0x01afffff;	//set sdramA size [22:21], 00:128MB, 01:256MB, 10:512MB, 11:1024MB
+	volatile reg_iop_t *iop = iop_regs;
+	unsigned int iop_start, iop_end;
 
-	memcpy(timer3_intr_cfg.dev_name, "Timer3", strlen("Timer3"));
-	timer3_intr_cfg.vector = 154;
-	timer3_intr_cfg.device_config = timer3_isr_cfg;
-	timer3_intr_cfg.interrupt_handler = qch_timer_callback;
-	interrupt_register(&timer3_intr_cfg);
+	iop_start = (unsigned int) &__iop_code_start_addr__;
+	iop_end = (unsigned int) &__iop_code_end_addr__;
 
-	memcpy(cbdma0_intr_cfg.dev_name, "CBDMA0", strlen("CBDMA0"));
-	cbdma0_intr_cfg.vector = 128;
-	cbdma0_intr_cfg.device_config = cbdma0_isr_cfg;
-	cbdma0_intr_cfg.interrupt_handler = cbdma0_isr;
-	interrupt_register(&cbdma0_intr_cfg);
+	printf("[DBG] iop_start : 0x%08x\n", iop_start);
+	printf("[DBG]   iop_end : 0x%08x\n", iop_end);
 
-	unsigned char *IOP_base =0x10000;
-	int i;
+#if 0
+	char idx;
+	unsigned char *dptr = (unsigned char *) iop_start;
+	printf("dump position: 0x%08x\n", dptr);
+	for(idx = 0; idx < 64; idx++)
+	{
+		if (idx != 0 && idx % 16 == 0)
+			printf("\n");
+		printf("%02x ", *(dptr + idx ));
+	}
+	printf("\n");
 
-	regs0->iop_control |= 0x1;
-
-	memset(IOP_base, 0x0, sizeof(IOPcode_NEC));
-	printf("IOP code size 0x%x\n", sizeof(IOPcode_NEC));
-	memcpy(IOP_base, &IOPcode_NEC, sizeof(IOPcode_NEC));
-
-	regs0->iop_control &=~(0x8000);
-	regs0->iop_control &=~(0x200);
-
-	regs0->iop_base_adr_l = ((UINT32)IOP_base & 0xFFFF);
-	regs0->iop_base_adr_h = ((UINT32)IOP_base >> 16);
-
-	regs0->memory_bridge_control |= 0x3;
-	for (i = 0; i < 12; i++)
-		regs0->iop_data[i] = 0;
-
-	regs0->iop_control &= ~(0x01);
-	// open the door!
-	regs0->iop_data[1] = 0xaa;
-
+	iop->iop_ctrl.bits.reset_ctrl       = 1;
+	iop->iop_ctrl.bits.dis_sys_rst_iop  = 0;
+	iop->iop_ctrl.bits.watch_dog_rst_en = 0;
+	iop->base_addr_l                    = iop_start & 0xFFFF;
+	iop->base_addr_h                    = iop_start >> 16;
+	iop->iop_ctrl.bits.reset_ctrl       = 0;
+#endif
 }
 
 
-void set_sequential_pattern(unsigned int *dst, unsigned int len)
+void qch_test_iop(int test_id)
 {
-	unsigned int *ptr = dst;
-	unsigned int *end_ptr = (unsigned int *) ((unsigned int)dst + len);
-	unsigned int pattern = 0;
+	volatile reg_iop_t *iop = iop_regs;
+	unsigned int i, tmp;
+	unsigned int retry_cnt = 0;
 
-	unsigned int check_repeat = 0, i;
-	for (i = 0; i < 32; i++) {
-		if (ptr[i] == i) {
-			check_repeat++;
-			if (check_repeat > 16)
-				return;
-		} else {
-			break;
-		}
+	iop->iop_data[9] = 1;
+
+	while(iop->iop_data[9] == 1 && retry_cnt < 4096) {
+		if (retry_cnt++ % 16 == 0)
+			printf(".");
+	}
+	printf("\n");
+
+	for (i = 0; i < 12; i++) {
+		printf("[DBG] iop_data[%d] : 0x%04x\n", i, iop->iop_data[i]);
 	}
 
-	printf("[set sequential pattern to 0x%08x]: start.\n", (unsigned int)ptr);
-	while (ptr < end_ptr) {
-		*ptr = pattern;
-		pattern++;
-		ptr++;
-	}
-
-	printf("[set sequential pattern]: set pattern done.\n");
-	// printf("[set sequential pattern]: flush dcache.\n");
-	// flush_dcache_all();
-	// printf("[set sequential pattern]: done.\n");
 }
-
-
-
 
 
 void qch_host_test(int test_id)
 {
 	volatile struct moon0_regs *moon0 = MOON0_REG;
+	volatile unsigned int *qch = (unsigned int *)RF_GRP(30, 2);
+
 	unsigned int repeat_untill_fail = FALSE;
 	unsigned int err = 0, retry_cnt = 0, is_timeout = FALSE;
 	int repeat_cnt = -1, rtn;
+	unsigned int active_bit;
 
 	printf("[DBG] test_id : %d\n", test_id);
 
 	/**
 	 * strange, why enable clken before checking ?
 	 */
-	if ((moon0->clken[1] & 0x1) == 0) {
-		moon0->clken[1] |= 1;
+	if ((moon0->clken[2] & 0x1) == 0) {
+		moon0->clken[2] = 0x00010001;
 	}
 
+	// enable clk , clear reset
+	*qch = RF_MASK_V_SET(nQCLKEN|QRESET);
+	// *qch = RF_MASK_V_CLR(QRESET);
+
 	printf("[DBG] Now, Qchannel is running state.\n");
-	rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, ON);
+	rtn = qch_access_protect_routine(0, ON);
 	if (rtn != 0) {
 		printf("[DBG] Open CBDMA0 Fail.\n");
 		return;
@@ -396,21 +276,27 @@ __RETRY__:
 	is_cbdma0_done = FALSE;
 	clock_flipflop = 0;
 
-	cbdma_cfg_memcpy(0, (void *)CBDMA_TEST_DESTINATION, (void *)CBDMA_TEST_SOURCE, TEST_SIZE);
-	cbdma0_intr_onoff(ENABLE);
+	cbdma_memcpy(0, CBDMA_TEST_DESTINATION, CBDMA_TEST_SOURCE, CBDMA_TEST_SIZE);
+	g_cbmda_finished = 0;
+	cbdma_interrupt_control_mask(0, 1);
 	cbdma_kick_go(0);
-	timer_intr_onoff(ENABLE);
+
+	timer3_interrupt_control_mask(1);
 
 	is_timeout = FALSE;
-	while (is_cbdma0_done == FALSE) {
+	while (g_cbmda_finished == FALSE) {
+
+		active_bit = *qch & 0x2 != 0;
+		printf("[DBG] active_bit : %d\n", active_bit);
+
 		if (flipflop_cnt > 32) {
 			printf("Time out\n");
 			is_timeout = TRUE;
 			break;
 		}
 	}
-	timer_intr_onoff(DISABLE);
-	cbdma0_intr_onoff(DISABLE);
+	timer3_interrupt_control_mask(0);
+	cbdma_interrupt_control_mask(0, 0);
 
 	// if (is_timeout == FALSE)
 	// 	err = check_sequential_pattern((unsigned int *)CBDMA_TEST_DESTINATION, TEST_SIZE);
@@ -433,20 +319,18 @@ __RETRY__:
 
 	cbdma_clock_onoff = FALSE;
 
-	rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, OFF);
+	rtn = qch_access_protect_routine(0, OFF);
 	if (rtn != 0) {
 		printf("[DBG] Close CBDMA0 Fail.\n");
 		return;
 	}
-	moon0->clken[1] &= 0xFFFFFFFE;
-
 	printf("Done~\n");
 }
 
 void load_n_byte_from_cbdma_sram(unsigned int load_len)
 {
 	char idx;
-	volatile unsigned char *dptr = CBDMA0_SRAM_BASE;
+	volatile unsigned char *dptr = (unsigned char *) CBDMA0_SRAM_ADDRESS;
 	printf("dump position: 0x%08x\n", dptr);
 	for(idx = 0; idx < load_len; idx++)
 	{
@@ -458,29 +342,82 @@ void load_n_byte_from_cbdma_sram(unsigned int load_len)
 }
 
 
+
+typedef unsigned long long  u64;
+
+typedef struct st_noc_amba_master_ctrl_regs {
+	u64 tocfg;           // [RW] Timeout Configuration Register
+	u64 osslv;           // [RW] Check Outstanding to Specified Slave Register
+	u64 cgc;             // [RW] Clock Gating Hysteresis Counter Register
+	u64 cgo;             // [RW] Clock Gating Override Register
+	u64 cfg;             // [RW] Configurations Register
+	u64 reserved_0[27];  // -
+	u64 sts;             // [R] Status Flags Register
+	u64 bridge_id;       // [R] Bridge ID Register
+	u64 reserved_1[30];  // -
+	u64 err;             // [WZC] Status and Error Register
+	u64 toslvid;         // [R] Slave ID of Timed Out Requests Register
+	u64 era;             // [R] Local Read Decode Error Address Register
+	u64 ewa;             // [R] Local Write Decode Error Address Register
+	u64 reserved_2[4];   // -
+	u64 intm;            // [RW] Interrupt Mask Register
+	u64 reserved_3[23];  // -
+	u64 caddr;           // [RW] Address Capture Value Register
+	u64 caddrmsk;        // [RW] Address Capture Mask Register
+	struct noc_cmd_cap { //
+		u64 ccmd;        // [RW] Command Capture Control Register
+		u64 ccmdmsk;     // [RW] Command Capture Mask Register
+		u64 cntr;        // [RW] Count of Captured Events Register
+		u64 latnum;      // [RW] Number of Captured Commands over which Latency is to be Measured Register
+	} cmd_cap[2];        //
+	u64 reserved_4[2];   // -
+	u64 arovrd;          // [RW] AR Overrides
+	u64 awovrd;          // [RW] AW Overrides
+} noc_amba_master_ctrl_regs;
+
+#define NOC_REG_BASE     0x9C160000
+#define noc_cbdma0_m0_amba_ctrl_regs        ((volatile noc_amba_master_ctrl_regs *) (NOC_REG_BASE + 0x0001bc00))
+
+
 void qch_device_lead_test(int test_id)
 {
-	volatile struct moon0_regs *moon0 = MOON0_REG;
 	int rtn;
+	volatile unsigned int *qch = (unsigned int *)RF_GRP(30, 2);
 
-	// disable cbdma clock
-	rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, OFF);
+	volatile unsigned int *cpu_cfg = (unsigned int *)0x9c167c20;
+
+	// test for twofish, check auto wakeup
+	volatile noc_amba_master_ctrl_regs *noc = noc_cbdma0_m0_amba_ctrl_regs;
+
+	printf("[DBG] noc cbdma0 cfg: 0x%llx, addr 0x%x\n", noc->cfg, (unsigned int)&noc->cfg);
+	// noc->cfg = 0;
+
+	printf("[DBG] cpu_cfg : %d @ 0x%x\n", *cpu_cfg, cpu_cfg);
+
+	*cpu_cfg = 0;
+
+	rtn = qch_access_protect_routine(0, OFF);
 	if (rtn != 0) {
 		printf("[DBG] Close CBDMA0 Fail.\n");
 		return;
 	}
-	moon0->clken[1] &= 0xFFFFFFFE;
-	printf("Close cbdma clock done.\n");
+
+	// disable cbdma0 qch clken
+	// *qch = RF_MASK_V_CLR(nQCLKEN);
+
+	// disable cbdma clock
+	MOON0_REG->clken[2] = 0x00010000;
+
+	printf("Disable cbdma clock done.\n");
 
 	// try to access sram in cbdma.
 	load_n_byte_from_cbdma_sram(32);
 
-	rtn = qch_access_protect_routine(QCHANNEL_ID_CBDMA0, OFF);
+	rtn = qch_access_protect_routine(0, ON);
 	if (rtn != 0) {
 		printf("[DBG] Close CBDMA0 Fail.\n");
 		return;
 	}
-	moon0->clken[1] &= 0xFFFFFFFE;
 
 }
 
