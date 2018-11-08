@@ -2,12 +2,15 @@ COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
 
-CROSS = ./tools/armv7a-unknown-eabi_gcc_4.7.2/bin/armv7a-unknown-eabi-
+CROSS = ./tools/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+
 BIN = bin
 TARGET = rom
-LD_FILE = ./script/rom.ld
+LD_FILE = rom.ld
+LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
-LDFLAGS_COM := -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -L $(shell dirname `$(CROSS)gcc -print-file-name=libc.a`) -lgcc -lc
+LDFLAGS_COM  = -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -lgcc
+#LDFLAGS_COM := -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -L $(shell dirname `$(CROSS)gcc -print-file-name=libc.a`) -lgcc -lc
 
 CFLAGS += -fno-builtin
 CFLAGS += -nodefaultlibs
@@ -27,7 +30,8 @@ CSOURCES = main.c
 # common
 
 CSOURCES += $(COMMON_DIR)/diag.c $(COMMON_DIR)/common.c $(COMMON_DIR)/sio.c $(COMMON_DIR)/cpu_util.c $(wildcard ./testapi/util/*.c)
-CSOURCES += $(COMMON_DIR)/uart_printf.c
+CSOURCES += $(COMMON_DIR)/eabi_compat.c
+#CSOURCES += $(COMMON_DIR)/uart_printf.c
 
 # mon
 CSOURCES += mon/monitor.c
@@ -45,7 +49,7 @@ ifeq "$(NOC_TEST)" "ENABLE"
 	CSOURCES += $(wildcard $(TEST_NOC)/*.c)
 endif
 
-QCH_TEST = ENABLE
+#QCH_TEST = ENABLE
 ifeq "$(QCH_TEST)" "ENABLE"
 	TEST_QCH = $(TESTAPI)/qch
 	CFLAGS += -DQCH_TEST
@@ -53,32 +57,35 @@ ifeq "$(QCH_TEST)" "ENABLE"
 	ASOURCES += $(wildcard $(TEST_QCH)/*.S)
 endif
 
-
-TEST_AXI_MON = $(TESTAPI)/axi_monitor
-CSOURCES += $(wildcard $(TEST_AXI_MON)/*.c)
-
+#AXI_MON = ENABLE
+ifeq "$(AXI_MON)" "ENABLE"
+	CFLAGS += -DAXI_MON
+	TEST_AXI_MON = $(TESTAPI)/axi_monitor
+	CSOURCES += $(wildcard $(TEST_AXI_MON)/*.c)
+endif
 
 OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 
 
 .PHONY: clean all
 
-all: clean $(TARGET)
-
+all: clean $(TARGET) pack
+	dd if=prebuilt/xboot.img of=bin/out.bin bs=1k seek=64
+	dd if=bin/rom.img of=bin/out.bin bs=1k seek=128
 
 $(TARGET): $(OBJS)
-	@-rm -Rf $(BIN)
-	@mkdir -p $(BIN)
+	@$(CROSS)cpp -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
 	$(CROSS)ld $(OBJS) -o $(BIN)/$@ -Map $(BIN)/$@.map $(LDFLAGS) $(LDFLAGS_COM)
 	$(CROSS)objcopy -O binary -S $(BIN)/$@ $(BIN)/$@.bin
 	$(CROSS)objdump -d -S $(BIN)/$@ > $(BIN)/$@.dis
+
+pack:
 	@# Add image header
 	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh uboot $(BIN)/$@.bin $(BIN)/$@.img 0x200000 0x200000
+	@bash ./script/add_uhdr.sh uboot $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200000 0x200000
 	@sz=`du -sb bin/$@.img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
-	bash ./script/update_all.sh $(SPI_ALL)
 
-testapi/qch/iop.o: testapi/qch/DQ8051.bin
+#testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
 	@$(CROSS)gcc $(CFLAGS) -c -o $@ $<
 
@@ -106,7 +113,6 @@ up:
 clean:
 	@-rm -f $(OBJS) >/dev/null
 	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL).bin $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
-	@-rm -Rf $(BIN)
 	@-rm -f pack.conf >/dev/null
 
 

@@ -1,5 +1,5 @@
 #include <types.h>
-
+#include "common_all.h"
 #include "sp_interrupt.h"
 
 void _RESET_handler( void ) __attribute__ ((naked));
@@ -45,9 +45,9 @@ static void interrupt_disable(void)
 static int check_int_opt(interrupt_operation *int_opt)
 {
     if (int_opt->vector < 32 * 7) {
-        // prn_string("check_int_opt: [vector] pass \n");
+        printf("check_int_opt: [vector] pass \n");
         if (int_opt->device_config != 0 && ((int_opt->interrupt_handler != 0) || (int_opt->interrupt_handler_with_vector != 0))) {
-            // prn_string("check_int_opt: [callback] pass \n");
+            printf("check_int_opt: [callback] pass \n");
             return 0;
         } else {
             return -1;
@@ -98,7 +98,6 @@ static void excute_int_config_opt(void)
     prn_string("Enter excute_int_config_opt() \n");
     while (i < 32 * 7) {
         if (int_opt_table[i] != 0) {
-            // prn_string("Find registed interrupt device \n");
             (int_opt_table[i])->device_config();
         }
         i++;
@@ -156,6 +155,7 @@ int interrupt_register(interrupt_operation *int_opt)
     }
 
     int_opt_table[int_opt->vector] = int_opt;
+
     // prn_string("interrupt_register successfully \n");
     return 0;
 }

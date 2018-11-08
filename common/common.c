@@ -54,3 +54,10 @@ void *memcpy(UINT8 *s1, const UINT8 *s2, int n)
 
 	return s1;
 }
+
+int strlen(const char * str)
+{
+	const char *start = str;
+	while (*str) str++;
+	return str - start;
+}

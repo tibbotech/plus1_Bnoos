@@ -233,7 +233,7 @@ static void _qchannel(int argc, char *argv[])
 
 #endif
 
-
+#ifdef AXI_MON
 void _axi(int argc, char *argv[])
 {
 	char *cmd;
@@ -262,7 +262,7 @@ void _axi(int argc, char *argv[])
 		printf("Unknown command.\n");
 	}
 }
-
+#endif
 
 static CMD_LIST cmd_list[] =
 {
@@ -273,8 +273,9 @@ static CMD_LIST cmd_list[] =
 
 	{"cbdma", cbdma_test, "CBDMA test"	},
 	{"timer", timer_test, "Timer test"	},
+#ifdef AXI_MON
 	{"axi", _axi, "AXI MON test"	},
-
+#endif
 #ifdef NOC_TEST
 	{"noc",       _noc,                 "Utilities for NoC."},
 #endif

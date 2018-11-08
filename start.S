@@ -2,13 +2,15 @@
 #include <asm/link.h>
 #include <asm/common.h>
 
+#define STACK_SIZE 8*1024
+
 .equ _ISR_STARTADDRESS, STACK_SRAM
 .equ UserStack, _ISR_STARTADDRESS
-.equ SVCStack, _ISR_STARTADDRESS+256*4
-.equ UndefStack, _ISR_STARTADDRESS+256*8
-.equ AbortStack, _ISR_STARTADDRESS+256*12
-.equ IRQStack, _ISR_STARTADDRESS+256*16
-.equ FIQStack, _ISR_STARTADDRESS+256*20
+.equ SVCStack, UserStack-STACK_SIZE
+.equ UndefStack, SVCStack-STACK_SIZE
+.equ AbortStack, UndefStack-STACK_SIZE
+.equ IRQStack, AbortStack-STACK_SIZE
+.equ FIQStack, IRQStack-STACK_SIZE
 
 .equ USERMODE, 0x10
 .equ FIQMODE, 0x11
@@ -39,11 +41,6 @@ _start:
      MSR CPSR_c, R1
      LDR SP, =AbortStack
 
-     #设置管理模式下的SP
-     ORR R1, R0, #SVCMODE
-     MSR CPSR_c, R1
-     LDR SP, =SVCStack
-
      #设置IRQ模式下的SP
      ORR R1, R0, #IRQMODE
      MSR CPSR_c, R1
@@ -53,6 +50,11 @@ _start:
      ORR R1, R0, #FIQMODE
      MSR CPSR_c, R1
      LDR SP, =FIQStack
+
+     #设置管理模式下的SP
+     ORR R1, R0, #SVCMODE
+     MSR CPSR_c, R1
+     LDR SP, =SVCStack
 
      mcr p15, 0, r0, c8, c7, 0   /* invalidate TLB */
      mcr p15, 0, r0, c7, c5, 0   /* invalidate I Cache */
