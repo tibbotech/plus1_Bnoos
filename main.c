@@ -21,7 +21,7 @@ extern void mmu_init();
 extern char __vectors_start[];
 extern char __vectors_end[];
 
-#define INTR_SAMPLE
+//#define INTR_SAMPLE
 #ifdef INTR_SAMPLE
 void gpio_int_0_callback(void)
 {
@@ -89,7 +89,7 @@ int main(void)
 #endif
 
 	//cbdma_test_init();
-	//timer_test_init();
+	timer_test_init();
 #ifdef AXI_MON
 	axi_mon_test_init();
 #endif

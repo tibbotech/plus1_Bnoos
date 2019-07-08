@@ -22,7 +22,7 @@
 
 
 
-#define TIMER3_TICKS		(90 - 1)		/* 1ms */
+#define TIMER3_TICKS		(90 - 1)		/* 1s */
 #define TIMER3_CONFIG_STC	(1 << 2)	/* src: stc */
 #define TIMER3_RELOAD		(1 << 1)	/* timer3 auto reload */
 #define TIMER3_RUN 			(1 << 0)	/* timer3 run */
@@ -47,8 +47,8 @@ void timer3_interrupt_control_mask(int enable)
 static void timer3_isr_cfg()
 {
 	printf("[CFG] Timer3\n");
-	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD | TIMER3_RUN;
-	STC_REG->timer3_pres_val = 0;
+	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD;
+	STC_REG->timer3_pres_val = 1000;
 	STC_REG->timer3_reload = TIMER3_TICKS;
 	STC_REG->timer3_cnt = TIMER3_TICKS;
 	hal_interrupt_configure(154, 0, 1);
@@ -58,8 +58,7 @@ static void timer3_isr_cfg()
 void timer3_callback(void)
 {
 	hal_interrupt_acknowledge(154);
-	printf("@Hello[%d]\n", g_repeat_cnt);
-	g_repeat_cnt++;
+	printf("@Hello[%d]\n", ++g_repeat_cnt);
 }
 
 extern void qch_timer_callback(void);
@@ -87,15 +86,12 @@ void timer_test()
 
 	g_repeat_cnt = 0;
 
-	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD | TIMER3_RUN;
-	STC_REG->timer3_pres_val = 0;
-	STC_REG->timer3_reload = TIMER3_TICKS - 1;
-	STC_REG->timer3_cnt = TIMER3_TICKS - 1;
-
 	timer3_interrupt_control_mask(1);
+	STC_REG->timer3_ctl |= TIMER3_RUN;
 
 	while(g_repeat_cnt < 6);
 
+	STC_REG->timer3_ctl &= ~TIMER3_RUN;
 	timer3_interrupt_control_mask(0);
 
 	printf("Timer3 interrupt test finished\n");
