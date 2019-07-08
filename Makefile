@@ -70,8 +70,8 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 .PHONY: clean all
 
 all: clean $(TARGET) pack
-	dd if=prebuilt/xboot.img of=bin/out.bin bs=1k seek=64
-	dd if=bin/rom.img of=bin/out.bin bs=1k seek=128
+	dd if=../../boot/xboot/bin/xboot.img of=bin/out.bin bs=1k seek=64
+	dd if=bin/rom.img of=bin/out.bin bs=1k seek=256
 
 $(TARGET): $(OBJS)
 	@$(CROSS)cpp -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
@@ -82,8 +82,8 @@ $(TARGET): $(OBJS)
 pack:
 	@# Add image header
 	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh uboot $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200000 0x200000
-	@sz=`du -sb bin/$@.img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
+	@bash ./script/add_uhdr.sh uboot_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200040 0x200040
+	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
@@ -113,7 +113,7 @@ up:
 clean:
 	@-rm -f $(OBJS) >/dev/null
 	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL).bin $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
-	@-rm -f pack.conf >/dev/null
+	@-rm -f bin/out.bin $(LD_FILE) >/dev/null
 
 
 p-%:
