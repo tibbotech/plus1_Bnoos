@@ -11,8 +11,8 @@ void _NO_USED_handler( void ) __attribute__ ((naked));
 void _IRQ_handler( void ) __attribute__ ((naked));
 void _FIRQ_handler( void ) __attribute__ ((naked));
 
-interrupt_operation  *int_opt_table[32 * 7] = {0};
-
+#define IRQS        (32 * 7)
+interrupt_operation  *int_opt_table[IRQS] = {0};
 
 static void interrupt_reset(void)
 {
@@ -44,7 +44,7 @@ static void interrupt_disable(void)
 
 static int check_int_opt(interrupt_operation *int_opt)
 {
-    if (int_opt->vector < 32 * 7) {
+    if (int_opt->vector < IRQS) {
         printf("check_int_opt: [vector] pass \n");
         if (int_opt->device_config != 0 && ((int_opt->interrupt_handler != 0) || (int_opt->interrupt_handler_with_vector != 0))) {
             printf("check_int_opt: [callback] pass \n");
@@ -96,7 +96,7 @@ static void excute_int_config_opt(void)
 {
     size_t i = 0;
     prn_string("Enter excute_int_config_opt() \n");
-    while (i < 32 * 7) {
+    while (i < IRQS) {
         if (int_opt_table[i] != 0) {
             (int_opt_table[i])->device_config();
         }
@@ -107,7 +107,7 @@ static void excute_int_config_opt(void)
 
 static void excute_int_handler(unsigned vector)
 {
-    if (vector < 32 * 7) {
+    if (vector < IRQS) {
         if (int_opt_table[vector] != 0) {
             if ((int_opt_table[vector])->interrupt_handler != 0) {
                 (int_opt_table[vector])->interrupt_handler();

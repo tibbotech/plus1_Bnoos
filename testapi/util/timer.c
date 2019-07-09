@@ -28,6 +28,7 @@
 #define TIMER3_RUN 			(1 << 0)	/* timer3 run */
 #define TIMER3_STOP			(0 << 0)	/* timer3 stop */
 
+#define TIMER3_INT  (154)
 
 static unsigned int g_repeat_cnt = 0;
 
@@ -36,9 +37,9 @@ void timer3_interrupt_control_mask(int enable)
 {
 	if (enable != 0) {
 		/* enable timer0 interrupt */
-		hal_interrupt_unmask(154);
+		hal_interrupt_unmask(TIMER3_INT);
 	} else {
-		hal_interrupt_mask(154);
+		hal_interrupt_mask(TIMER3_INT);
 	}
 }
 
@@ -48,16 +49,16 @@ static void timer3_isr_cfg()
 {
 	printf("[CFG] Timer3\n");
 	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD;
-	STC_REG->timer3_pres_val = 1000;
+	STC_REG->timer3_pres_val = 999;
 	STC_REG->timer3_reload = TIMER3_TICKS;
 	STC_REG->timer3_cnt = TIMER3_TICKS;
-	hal_interrupt_configure(154, 0, 1);
+	hal_interrupt_configure(TIMER3_INT, 0, 1);
 }
 
 
 void timer3_callback(void)
 {
-	hal_interrupt_acknowledge(154);
+	hal_interrupt_acknowledge(TIMER3_INT);
 	printf("@Hello[%d]\n", ++g_repeat_cnt);
 }
 
@@ -68,7 +69,7 @@ void timer_test_init()
 	static interrupt_operation timer3_opt;
 
 	memcpy(timer3_opt.dev_name, "Timer3", strlen("Timer3"));
-	timer3_opt.vector = 154;
+	timer3_opt.vector = TIMER3_INT;
 	timer3_opt.device_config = timer3_isr_cfg;
 #ifdef QCH_TEST
 	timer3_opt.interrupt_handler = qch_timer_callback;
