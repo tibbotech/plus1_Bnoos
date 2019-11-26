@@ -30,7 +30,7 @@
 
 #define TIMER3_INT  (154)
 
-static unsigned int g_repeat_cnt = 0;
+static volatile unsigned int g_repeat_cnt = 0;
 
 
 void timer3_interrupt_control_mask(int enable)
@@ -90,7 +90,7 @@ void timer_test()
 	timer3_interrupt_control_mask(1);
 	STC_REG->timer3_ctl |= TIMER3_RUN;
 
-	while(g_repeat_cnt < 6);
+	while (g_repeat_cnt < 6);
 
 	STC_REG->timer3_ctl &= ~TIMER3_RUN;
 	timer3_interrupt_control_mask(0);
