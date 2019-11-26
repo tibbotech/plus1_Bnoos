@@ -2,7 +2,7 @@ COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
 
-CROSS = ./tools/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
 
 BIN = bin
 TARGET = rom
