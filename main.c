@@ -67,6 +67,35 @@ void hw_init()
 
 }
 
+#define IPC_B2A_TEST
+#ifdef IPC_B2A_TEST
+#define IPC_A2B		(0x9c008100) // G258
+#define IPC_B2A		(0x9c008180) // G259
+#define CA7_READY	(0xca700001)
+
+static void ipc_b2a_test(void)
+{
+	volatile unsigned int *a2b = (volatile unsigned int *)IPC_A2B;
+	volatile unsigned int *b2a = (volatile unsigned int *)IPC_B2A;
+
+	printf("IPC test:\nwait A ready...\n");
+	while (a2b[31] != CA7_READY);
+
+	printf("test B2A...\n");
+	// direct (mbox)
+	b2a[24] = 0x12345678;
+	b2a[25] = 0x5a5a5a5a;
+	b2a[26] = 0xa5a5a5a5;
+	b2a[27] = 0xdeadc0de;
+	b2a[28] = 0x01010101;
+	b2a[29] = 0x19730611;
+	b2a[30] = 0x87654321;
+	b2a[31] = 0x00000000;
+	// rpc
+	b2a[0] = 1;
+}
+#endif
+
 int main(void)
 {
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
@@ -101,6 +130,10 @@ int main(void)
 	sp_interrupt_setup();
 
 	printf("NonOS boot OK!!!\n");
+
+#ifdef IPC_B2A_TEST
+	ipc_b2a_test();
+#endif
 
 	task_dbg();
 
