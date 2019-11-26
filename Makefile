@@ -12,7 +12,7 @@ LDFLAGS = -T $(LD_FILE)
 LDFLAGS_COM  = -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -lgcc
 #LDFLAGS_COM := -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -L $(shell dirname `$(CROSS)gcc -print-file-name=libc.a`) -lgcc -lc
 
-CFLAGS += -fno-builtin
+CFLAGS += -fno-builtin -O1
 CFLAGS += -nodefaultlibs
 CFALGS += -ffunction-sections -fdata-sections -flto
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable -Wno-implicit-function-declaration
@@ -82,7 +82,7 @@ $(TARGET): $(OBJS)
 pack:
 	@# Add image header
 	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh uboot_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200040 0x200040
+	@bash ./script/add_uhdr.sh nonos_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x10040 0x10040
 	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin

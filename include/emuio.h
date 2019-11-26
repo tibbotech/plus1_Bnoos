@@ -15,7 +15,7 @@ char linebuf[300];
 #define UART_TX_EMPTY       (1 << 6)
 
 // UART
-#define UART_REG            UART0_REG
+#define UART_REG            UART1_REG
 #define UART_tx_rdy()       (UART_REG->lsr & UART_LSR_TX_RDY)
 #define UART_rx_rdy()       (UART_REG->lsr & UART_LSR_RX_RDY)
 #define UART_tx_empty()     (UART_REG->lsr & UART_TX_EMPTY)
