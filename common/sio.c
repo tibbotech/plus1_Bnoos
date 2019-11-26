@@ -50,17 +50,6 @@ const  char radix_table[36] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /*---------------------------------------------------------------------------*
 *                               FUNCTION   DECLARATIONS                                                        *
 *---------------------------------------------------------------------------*/
-void io_write_wait(const char *s)
-{
-	int c;
-
-	while ((c = *s++) != 0)
-	{
-		UART0_putc(c);
-		if (c == 10) UART0_putc(13);
-	}
-}
-
 static char    *__ltoa16__(char *dest, t_num *X, unsigned conversion, int width)
 {
     int size = 0;

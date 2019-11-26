@@ -28,7 +28,7 @@ Date                Author              Modification
 *---------------------------------------------------------------------------*/
 extern char *mon_readhex(char *p, unsigned int *x);
 const char *mon_readstr(char *p, int *x);
-void mon_puts(char *s);
+#define mon_puts UART_puts
 /*---------------------------------------------------------------------------*
 *                 MACRO  DECLARATIONS                                                       *
 *---------------------------------------------------------------------------*/
@@ -312,8 +312,8 @@ int  _strncmp( const char *s1 , const char *s2 , int n)
 //stdlib
  int polling_io(void)
 {
-	while (UART0_rx_rdy()) {
-		int c = UART0_getc();
+	while (UART_rx_rdy()) {
+		int c = UART_getc();
 		if (c == 'm')
 			key_trick = 1;
 		else if (c == 'o')
@@ -399,16 +399,6 @@ char *mon_readhex(char *p, unsigned int *x)
 	return p;
 }
 
-void mon_puts(char *s)
-{
-	int c;
-	while ((c = *s++) != 0)
-	{
-		UART0_putc(c);
-		if (c == 10) UART0_putc(13);
-	}
-}
-
 static int mon_read(char *buf, int maxl, char *last)
 {
 	int c;
@@ -418,12 +408,12 @@ static int mon_read(char *buf, int maxl, char *last)
 
 	do {
 
-		if (!UART0_rx_rdy()) {
+		if (!UART_rx_rdy()) {
 			//cpu_intr_enable();    // wait a character
 			continue;
 		}
 
-		c = UART0_getc();           // get input char
+		c = UART_getc();           // get input char
 
 		if (c == 27) return -1; // ESC cancel command
 		if (c == '\r' || c == '\n') {
@@ -445,7 +435,7 @@ static int mon_read(char *buf, int maxl, char *last)
 		else {
 			buf[L++] = c;
 		}
-		UART0_putc(c);
+		UART_putc(c);
 		buf[L] = '\0';
 	}
 	while (L < maxl);

@@ -2,11 +2,12 @@
 *                    I N C L U D E   F I L E S                            *
  **************************************************************************/
 #include <common.h>
+#include <emuio.h>
 
 /**************************************************************************
  *                   G E N E R A L    C O N S T A N T S                   *
  **************************************************************************/
-#define UART_put_byte(x) uart0_putc(x)
+#define UART_put_byte(x) UART_putc(x)
 
 unsigned int mp = 0;
 
@@ -15,8 +16,8 @@ void prn_string(char *str)
 {
         if (mp) {
                 return;
-        }	
-	
+        }
+
     while(*str) {
         if (*str == '\n')
             UART_put_byte('\r');
@@ -31,8 +32,8 @@ void prn_byte(unsigned char b)
 	char c;
         if (mp) {
                 return;
-        }	
-	
+        }
+
 	UART_put_byte('0');
 	UART_put_byte('x');
 	c = (b >> 4);
@@ -52,7 +53,7 @@ void prn_byten(unsigned char *b)
         if (mp) {
                 return;
         }
-        	
+
 	UART_put_byte('0');
 	UART_put_byte('x');
 	c = (*b >> 4);
@@ -74,8 +75,8 @@ void prn_dword(unsigned int w)
 	char c, i;
         if (mp) {
                 return;
-        }	
-	
+        }
+
 	UART_put_byte('0');
 	UART_put_byte('x');
 	for(i=1; i<=8; i++) {
