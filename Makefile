@@ -64,6 +64,8 @@ ifeq "$(AXI_MON)" "ENABLE"
 	CSOURCES += $(wildcard $(TEST_AXI_MON)/*.c)
 endif
 
+CFLAGS += -DIPC_TEST
+
 OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 
 

@@ -67,19 +67,19 @@ void hw_init()
 
 }
 
-#define IPC_B2A_TEST
-#ifdef IPC_B2A_TEST
+#ifdef IPC_TEST
 #define IPC_A2B		(0x9c008100) // G258
 #define IPC_B2A		(0x9c008180) // G259
 #define CA7_READY	(0xca700001)
 
-static void ipc_b2a_test(void)
+void ipc_test(void)
 {
 	volatile unsigned int *a2b = (volatile unsigned int *)IPC_A2B;
 	volatile unsigned int *b2a = (volatile unsigned int *)IPC_B2A;
 
 	printf("IPC test:\nwait A ready...\n");
 	while (a2b[31] != CA7_READY);
+	a2b[31] = 0; // clear ready flag for next test
 
 	printf("test B2A...\n");
 	// direct (mbox)
@@ -130,10 +130,6 @@ int main(void)
 	sp_interrupt_setup();
 
 	printf("NonOS boot OK!!!\n");
-
-#ifdef IPC_B2A_TEST
-	ipc_b2a_test();
-#endif
 
 	task_dbg();
 

@@ -264,6 +264,9 @@ void _axi(int argc, char *argv[])
 }
 #endif
 
+#ifdef IPC_TEST
+void ipc_test();
+#endif
 static CMD_LIST cmd_list[] =
 {
 	{"lreg",      _lreg,                "Read Register."},
@@ -273,6 +276,9 @@ static CMD_LIST cmd_list[] =
 
 	{"cbdma", cbdma_test, "CBDMA test"	},
 	{"timer", timer_test, "Timer test"	},
+#ifdef IPC_TEST
+	{"ipc", ipc_test, "IPC test" },
+#endif
 #ifdef AXI_MON
 	{"axi", _axi, "AXI MON test"	},
 #endif
