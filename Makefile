@@ -72,8 +72,8 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 .PHONY: clean all
 
 all: clean $(TARGET) pack
-	dd if=../../boot/xboot/bin/xboot.img of=bin/out.bin bs=1k seek=64
-	dd if=bin/rom.img of=bin/out.bin bs=1k seek=256
+	#dd if=../../boot/xboot/bin/xboot.img of=bin/out.bin bs=1k seek=64
+	#dd if=bin/rom.img of=bin/out.bin bs=1k seek=256
 
 $(TARGET): $(OBJS)
 	@$(CROSS)cpp -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
