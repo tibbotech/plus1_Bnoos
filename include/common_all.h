@@ -9,6 +9,7 @@
 #include "emuio.h"
 #include "cbdma.h"
 #include "timer.h"
+#include "ipc.h"
 #include "axi_monitor.h"
 
 #endif /* _COMMON_ALL_H_ */

@@ -248,8 +248,6 @@ void _axi(int argc, char *argv[])
 		printf("help\n");
 	}
 
-
-
 	if (strncmp(cmd, "ue", cmd_len) == 0) {
 		axi_mon_unexcept_access_test();
 	} else if (strncmp(cmd, "to", cmd_len) == 0) {
@@ -264,9 +262,7 @@ void _axi(int argc, char *argv[])
 }
 #endif
 
-#ifdef IPC_TEST
-void ipc_test();
-#endif
+
 static CMD_LIST cmd_list[] =
 {
 	{"lreg",      _lreg,                "Read Register."},
@@ -276,9 +272,8 @@ static CMD_LIST cmd_list[] =
 
 	{"cbdma", cbdma_test, "CBDMA test"	},
 	{"timer", timer_test, "Timer test"	},
-#ifdef IPC_TEST
-	{"ipc", ipc_test, "IPC test" },
-#endif
+	{"ipc", ipc_test, "IPC Start" },
+
 #ifdef AXI_MON
 	{"axi", _axi, "AXI MON test"	},
 #endif

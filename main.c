@@ -5,6 +5,7 @@
 #include "sp_interrupt.h"
 #include "common_all.h"
 #include "cache.h"
+#include "stc.h"
 
 #ifdef NOC_TEST
 // #include "display_pattern_384x240_nv12.inc"
@@ -67,48 +68,20 @@ void hw_init()
 
 }
 
-#ifdef IPC_TEST
-#define IPC_A2B		(0x9c008100) // G258
-#define IPC_B2A		(0x9c008180) // G259
-#define CA7_READY	(0xca700001)
-
-void ipc_test(void)
-{
-	volatile unsigned int *a2b = (volatile unsigned int *)IPC_A2B;
-	volatile unsigned int *b2a = (volatile unsigned int *)IPC_B2A;
-
-	printf("IPC test:\nwait A ready...\n");
-	while (a2b[31] != CA7_READY);
-	a2b[31] = 0; // clear ready flag for next test
-
-	printf("test B2A...\n");
-	// direct (mbox)
-	b2a[24] = 0x12345678;
-	b2a[25] = 0x5a5a5a5a;
-	b2a[26] = 0xa5a5a5a5;
-	b2a[27] = 0xdeadc0de;
-	b2a[28] = 0x01010101;
-	b2a[29] = 0x19730611;
-	b2a[30] = 0x87654321;
-	b2a[31] = 0x00000000;
-	// rpc
-	b2a[0] = 1;
-}
-#endif
-
 int main(void)
 {
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
 
 	hw_init();
-
+	AV1_STC_init();
+	
 	/*initial interrupt vector table*/
 	int_memcpy(0x00000000, __vectors_start, (unsigned)__vectors_end - (unsigned)__vectors_start);
 
 	mmu_init();
 	HAL_DCACHE_ENABLE();
 
-
+	ipc_init();
 #ifdef NOC_TEST
 	noc_initial_settings();
 #endif
@@ -128,11 +101,9 @@ int main(void)
 #endif
 	/* interrupt manager module init */
 	sp_interrupt_setup();
-
+	ipc_start();
 	printf("NonOS boot OK!!!\n");
-
 	task_dbg();
-
 	while(1);
 
 	//Never get here
