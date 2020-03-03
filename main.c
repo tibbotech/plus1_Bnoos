@@ -52,6 +52,23 @@ void gpio_intr_test_init()
 }
 #endif
 
+#ifdef RS485_TEST
+void rs485_test_init(int TX_pin, int RX_pin)
+{
+	/* uart2 pinmux : x3,UA2_TX, X4,UA2_RX */
+	TX_pin -= 7;
+	RX_pin -= 7;
+	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 0), (TX_pin << 0));
+	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 8), (RX_pin << 8));
+	MOON0_REG->reset[1] = RF_MASK_V_CLR(1 << 10); /* release UA2 */
+	UART2_REG->div_l = UART_BAUD_DIV_L(BAUDRATE, UART_SRC_CLK);
+	UART2_REG->div_h = UART_BAUD_DIV_H(BAUDRATE, UART_SRC_CLK);
+	GPIO0_e();
+	DE_RE(1);	
+}
+#endif 
+
+
 void hw_init()
 {
 	unsigned int i;
@@ -99,6 +116,11 @@ int main(void)
 #ifdef INTR_SAMPLE
 	gpio_intr_test_init();
 #endif
+
+#ifdef RS485_TEST
+	rs485_test_init(10,11);	//G_MX[10],G_MX[11]
+#endif 
+
 	/* interrupt manager module init */
 	sp_interrupt_setup();
 	ipc_start();

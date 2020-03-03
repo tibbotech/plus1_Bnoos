@@ -48,6 +48,11 @@ struct moon5_regs {
 };
 #define MOON5_REG ((volatile struct moon5_regs *)RF_GRP(5, 0))
 
+struct gpioxt6_regs {
+	unsigned int sft_cfg[32];
+};
+#define GPIOXT6_REG ((volatile struct gpioxt6_regs *)RF_GRP(6, 0))
+
 struct pad_ctl_regs {
         unsigned int reserved[20];         // 101.0
         unsigned int spi_flash_sftpad_ctl; // 101.20
