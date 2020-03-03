@@ -77,8 +77,7 @@ do { \
 
 // GPIO_0
 #define GP6_REG             GPIOXT6_REG
-#define GPIO0_e()           (GP6_REG->sft_cfg[8] |= 0x00010001 )
-#define DE_RE(c)       	    (GP6_REG->sft_cfg[16] |= (0x00010000 | (c)))		
+#define DE_RE(c,gpio)       (GP6_REG->sft_cfg[16] |= (((0x00010000)<<(gpio)) | ((c)<<(gpio))))		
 #endif 
 
 #endif /* _EMUIO_H_ */
