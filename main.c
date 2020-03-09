@@ -22,6 +22,13 @@ extern void mmu_init();
 extern char __vectors_start[];
 extern char __vectors_end[];
 
+
+#ifdef I2C_TEST
+u8	data_buf[255];
+u8	tx_buf[255];
+#endif
+
+
 //#define INTR_SAMPLE
 #ifdef INTR_SAMPLE
 void gpio_int_0_callback(void)
@@ -73,6 +80,13 @@ void hw_init()
 
 int main(void)
 {
+
+#ifdef I2C_TEST
+    unsigned int test;
+#endif
+
+
+
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
 
 	hw_init();
@@ -110,6 +124,12 @@ int main(void)
 	/* interrupt manager module init */
 	sp_interrupt_setup();
 	ipc_start();
+
+#ifdef I2C_TEST
+	sp_i2c_master_init();
+	sp_i2c_master_set_freq_khz(0, 100);
+#endif
+
 	printf("NonOS boot OK!!!\n");
 	task_dbg();
 	while(1);
