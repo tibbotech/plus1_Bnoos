@@ -39,12 +39,13 @@ void rs485_init(int TX_pin, int RX_pin)
 void _RS485_write(int argc, char *argv[])
 {
 	char *cmd;	
-	unsigned int value, cmd_len;
+	unsigned int value;
+	//unsigned int cmd_len;
 	DE_RE_High(Gpio_pin);	
 
 	if (argc >= 1) {
 		cmd = argv[0];
-		cmd_len = strlen(cmd);
+		//cmd_len = strlen(cmd);
 		UA2_printf("w: %s \n", cmd);
 	}
 	else {
@@ -54,14 +55,14 @@ void _RS485_write(int argc, char *argv[])
 
 void _RS485_read(int argc, char *argv[])
 {
-	char *cmd;	
-	unsigned int value, cmd_len;
-	int c;
+	//char *cmd;	
+	//unsigned int cmd_len;
+	int c = 0;
 	DE_RE_Low(Gpio_pin);
 
 	if (argc >= 1) {
-		cmd = argv[0];
-		cmd_len = strlen(cmd);
+		//cmd = argv[0];
+		//cmd_len = strlen(cmd);
 	}
 				
 	printf("Receive data: \n");
@@ -72,7 +73,9 @@ void _RS485_read(int argc, char *argv[])
 		}
 
 		if (c == 'q')
+		{
 			break;
+		}	
 	}		
 }
 
