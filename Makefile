@@ -76,6 +76,14 @@ ifeq "$(AXI_MON)" "ENABLE"
 	CSOURCES += $(wildcard $(TEST_AXI_MON)/*.c)
 endif
 
+#SPI_NOR_TEST = ENABLE
+ifeq "$(SPI_NOR_TEST)" "ENABLE"
+        CFLAGS += -DSPI_NOR_TEST
+        # spi nor test
+        SPINOR_PATH = drivers/spinor
+        CSOURCES += $(wildcard $(SPINOR_PATH)/*.c)
+endif
+
 RS485_TEST = ENABLE
 ifeq "$(RS485_TEST)" "ENABLE"
 	CFLAGS += -DRS485_TEST
