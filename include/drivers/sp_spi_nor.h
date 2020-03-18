@@ -24,8 +24,7 @@ typedef unsigned short UINT16;
 typedef unsigned char UINT8;
 typedef unsigned char BYTE;
 
-
-
+extern int sp_spi_nor_claim_bus(unsigned int clock);
 extern void sp_spi_nor_init(void);
 extern int sp_spi_nor_xfer(unsigned int bitlen, const void *dout, void *din, unsigned long flags);
 //extern void Flash_Init(int argc, char *argv[]);
@@ -34,14 +33,14 @@ extern int sp_spi_nor_xfer(unsigned int bitlen, const void *dout, void *din, uns
 //extern void FlashWrite(int argc, char *argv[]);
 extern void FlashCommand(int argc, char *argv[]);
 
-#define ALL_DEBUG
+//#define ALL_DEBUG
 #ifdef ALL_DEBUG
 #define diag_printf(fmt, arg...)        printf(fmt, ##arg)
 #else
 #define diag_printf(s...)               ((void)0)
 #endif
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define msg_printf(fmt, arg...)         printf(fmt, ##arg)
 #else
