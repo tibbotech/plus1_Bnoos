@@ -120,7 +120,7 @@ void FlashCommand(int argc, char *argv[])
 		} else
 			printf("-i:init\n-e:erase, -e offset len\n-r:read,  -r memaddr offset len\n-w:write, -w memaddr offset len\n");
 	} else {
-		diag_printf("help\n");
+		printf("-i:init\n-e:erase, -e offset len\n-r:read,  -r memaddr offset len\n-w:write, -w memaddr offset len\n");
 	}
 }
 
