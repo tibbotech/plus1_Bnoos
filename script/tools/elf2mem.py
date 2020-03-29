@@ -35,10 +35,10 @@ program_header_regexp = re.compile(
 
 if __name__ == '__main__':
 	# get args
-	input_elf, output_hex, tool_chain_prefix = sys.argv[1:]
+	input_elf, output_hex, readelf = sys.argv[1:]
 
 	# parse section info from elf
-	cmd = [tool_chain_prefix+"readelf", "-l", input_elf]
+	cmd = [readelf, "-l", input_elf]
 	proc = Popen(cmd, stdout=PIPE)
 	program_header, err = proc.communicate()
 

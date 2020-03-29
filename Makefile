@@ -4,6 +4,12 @@ TESTAPI = testapi
 
 ifeq ($(CROSS),)
 CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+CC = $(CROSS)gcc
+LD = $(CROSS)ld
+CPP = $(CROSS)cpp
+OBJCOPY = $(CROSS)objcopy
+OBJDUMP = $(CROSS)objdump
+READELF = $(CROSS)readelf
 endif
 
 BIN = bin
@@ -11,8 +17,8 @@ TARGET = rom
 LD_FILE = rom.ld
 LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
-LDFLAGS_COM  = -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -lgcc
-#LDFLAGS_COM := -L $(shell dirname `$(CROSS)gcc -print-libgcc-file-name`) -L $(shell dirname `$(CROSS)gcc -print-file-name=libc.a`) -lgcc -lc
+LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
+#LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
 
 CFLAGS += -fno-builtin -O1
 CFLAGS += -nodefaultlibs
@@ -103,10 +109,10 @@ all: clean $(TARGET) pack
 	
 
 $(TARGET): $(OBJS)
-	@$(CROSS)cpp -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
-	$(CROSS)ld $(OBJS) -o $(BIN)/$@ -Map $(BIN)/$@.map $(LDFLAGS) $(LDFLAGS_COM)
-	$(CROSS)objcopy -O binary -S $(BIN)/$@ $(BIN)/$@.bin
-	$(CROSS)objdump -d -S $(BIN)/$@ > $(BIN)/$@.dis
+	@$(CPP) -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
+	$(LD) $(OBJS) -o $(BIN)/$@ -Map $(BIN)/$@.map $(LDFLAGS) $(LDFLAGS_COM)
+	$(OBJCOPY) -O binary -S $(BIN)/$@ $(BIN)/$@.bin
+	$(OBJDUMP) -d -S $(BIN)/$@ > $(BIN)/$@.dis
 
 pack:
 	@# Add image header
@@ -116,20 +122,20 @@ pack:
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
-	@$(CROSS)gcc $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 
 %.o: %.c
-	@$(CROSS)gcc $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 
 $(BIN)/$(TARGET): $(OBJS)
-	@$(CROSS)ld $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
+	@$(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 
 zmem: $(BIN)/zmem.hex
 $(BIN)/zmem.hex: $(TARGET)
 # 	args: input_elf output_hex tool_chain_location
-	@python ./script/tools/elf2mem.py $(BIN)/$< $@ $(CROSS)
+	@python ./script/tools/elf2mem.py $(BIN)/$< $@ $(READELF)
 	@echo "Gen $@ finished."
 	@${MAKE} up
 
