@@ -2,8 +2,8 @@ COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
 
-ifeq ($(CROSS),)
-CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+#CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+ifneq ($(CROSS),)
 CC = $(CROSS)gcc
 LD = $(CROSS)ld
 CPP = $(CROSS)cpp
