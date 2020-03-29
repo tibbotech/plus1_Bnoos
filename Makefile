@@ -109,7 +109,7 @@ all: clean $(TARGET) pack
 	
 
 $(TARGET): $(OBJS)
-	@$(CPP) -P $(CFLAGS) $(LD_SRC) $(LD_FILE)
+	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
 	$(LD) $(OBJS) -o $(BIN)/$@ -Map $(BIN)/$@.map $(LDFLAGS) $(LDFLAGS_COM)
 	$(OBJCOPY) -O binary -S $(BIN)/$@ $(BIN)/$@.bin
 	$(OBJDUMP) -d -S $(BIN)/$@ > $(BIN)/$@.dis
