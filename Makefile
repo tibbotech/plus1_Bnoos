@@ -21,6 +21,10 @@ LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
 #LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
 
 CFLAGS += -fno-builtin -O1
+CFLAGS += -nostdlib -fno-builtin
+CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
+CFLAGS += -fno-partial-inlining -fno-jump-tables
+CFLAGS += -static
 CFLAGS += -nodefaultlibs
 CFALGS += -ffunction-sections -fdata-sections -flto
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable -Wno-implicit-function-declaration
