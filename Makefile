@@ -105,20 +105,26 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 
 .PHONY: clean all
 
-all: clean $(TARGET) pack
+all: clean $(BIN)/$(TARGET).img
 	
 
-$(TARGET): $(OBJS)
-	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
-	$(LD) $(OBJS) -o $(BIN)/$@ -Map $(BIN)/$@.map $(LDFLAGS) $(LDFLAGS_COM)
-	$(OBJCOPY) -O binary -S $(BIN)/$@ $(BIN)/$@.bin
-	$(OBJDUMP) -d -S $(BIN)/$@ > $(BIN)/$@.dis
-
-pack:
+$(BIN)/$(TARGET).img: $(BIN)/$(TARGET).bin
 	@# Add image header
-	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh nonos_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x10040 0x10040
-	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
+	@echo "Wrapping code image $@ of $< ..."
+	@bash ./script/add_uhdr.sh nonos_B $< $@ 0x10040 0x10040
+	@sz=`du -sb $@|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
+
+$(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
+	@$(OBJCOPY) -O binary -S $(BIN)/$(TARGET) $@
+
+$(BIN)/$(TARGET).dis: $(BIN)/$(TARGET)
+	@$(OBJDUMP) -d -S $< > $@
+
+$(BIN)/$(TARGET): $(OBJS) $(LD_FILE)
+	@$(LD) -fno-stack-protector -shared $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
+
+$(LD_FILE): $(LD_SRC) $(OBJS)
+	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
@@ -128,9 +134,6 @@ pack:
 %.o: %.c
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
-
-$(BIN)/$(TARGET): $(OBJS)
-	@$(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 
 zmem: $(BIN)/zmem.hex
 $(BIN)/zmem.hex: $(TARGET)
