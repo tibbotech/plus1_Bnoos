@@ -125,7 +125,7 @@ $(BIN)/$(TARGET).dis: $(BIN)/$(TARGET)
 	@$(OBJDUMP) -d -S $< > $@
 
 $(BIN)/$(TARGET): $(OBJS) $(LD_FILE)
-	@$(LD) -fno-stack-protector -shared $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
+	@$(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 
 $(LD_FILE): $(LD_SRC) $(OBJS)
 	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
