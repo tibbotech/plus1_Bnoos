@@ -109,14 +109,8 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 
 .PHONY: clean all
 
-all: clean $(BIN)/$(TARGET).img
+all: clean $(BIN)/$(TARGET).bin
 	
-
-$(BIN)/$(TARGET).img: $(BIN)/$(TARGET).bin
-	@# Add image header
-	@echo "Wrapping code image $@ of $< ..."
-	@bash ./script/add_uhdr.sh nonos_B $< $@ 0x10040 0x10040
-	@sz=`du -sb $@|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
 
 $(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
 	@$(OBJCOPY) -O binary -S $(BIN)/$(TARGET) $@
@@ -154,7 +148,7 @@ up:
 
 clean:
 	@-rm -f $(OBJS) >/dev/null
-	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL).bin $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
+	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL).bin $(TARGET).map $(TARGET).dis >/dev/null
 	@-rm -f bin/out.bin $(LD_FILE) >/dev/null
 
 
