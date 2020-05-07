@@ -236,28 +236,35 @@ static void _qchannel(int argc, char *argv[])
 #ifdef AXI_MON
 void _axi(int argc, char *argv[])
 {
-	char *cmd;
-	unsigned int value, cmd_len, timeout_cnt = 1;
+	char *cmd = "";
+	unsigned int value, cmd_len = 0, timeout_cnt = 1;
 	int test_id = -1; // -1 means all
-
+	
 	if (argc >= 1) {
 		cmd = argv[0];
 		cmd_len = strlen(cmd);
 	}
+	
+ 	if(cmd_len != 0)
+ 	{
+		if (_strncmp(cmd, "ue", cmd_len) == 0) {
+			printf("ue\n");
+			axi_mon_unexcept_access_test();
+		} else if (_strncmp(cmd, "to", cmd_len) == 0) {
+			printf("to\n");
+			if (argc >= 2)
+				mon_readhex(argv[1], (unsigned int *) &timeout_cnt);
+			axi_mon_timeout_test(timeout_cnt);
+		} else if (_strncmp(cmd, "bw", cmd_len) == 0) {
+			printf("bw\n");
+			axi_mon_bw_test();
+		}
+		else {
+			printf("Unknown command.\n");
+		}
+ 	}
 	else {
-		printf("help\n");
-	}
-
-	if (strncmp(cmd, "ue", cmd_len) == 0) {
-		axi_mon_unexcept_access_test();
-	} else if (strncmp(cmd, "to", cmd_len) == 0) {
-		if (argc >= 2)
-			mon_readhex(argv[1], (unsigned int *) &timeout_cnt);
-		axi_mon_timeout_test(timeout_cnt);
-	} else if (strncmp(cmd, "bw", cmd_len) == 0) {
-		axi_mon_bw_test();
-	} else {
-		printf("Unknown command.\n");
+		printf("cmd_len = 0.\n");
 	}
 }
 #endif
