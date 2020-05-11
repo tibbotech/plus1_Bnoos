@@ -7,6 +7,9 @@
 #include "cache.h"
 #include "stc.h"
 
+#define A_and_B_chip   //A and B chip running simultaneously
+//#define A_chip_only       //A chip only
+
 #ifdef NOC_TEST
 // #include "display_pattern_384x240_nv12.inc"
 extern void noc_initial_settings();
@@ -59,9 +62,6 @@ void gpio_intr_test_init()
 }
 #endif
 
-
-
-
 void hw_init()
 {
 	unsigned int i;
@@ -78,6 +78,7 @@ void hw_init()
 
 }
 
+#ifdef A_chip_only
 int main(void)
 {
 
@@ -137,3 +138,28 @@ int main(void)
 	//Never get here
 	return 0;
 }
+#endif 
+
+#ifdef A_and_B_chip
+int main(void)
+{
+#ifdef I2C_TEST
+    unsigned int test;
+#endif
+
+	printf("Build @%s, %s\n", __DATE__, __TIME__);
+	ipc_init();
+
+#ifdef RS485_TEST
+	rs485_init(10,11);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO 
+#endif 
+
+	ipc_start();
+	printf("NonOS boot OK!!!\n");
+	task_dbg();
+	while(1);
+
+	//Never get here
+	return 0;
+}
+#endif 
