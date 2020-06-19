@@ -94,7 +94,7 @@ ifeq "$(SPI_NOR_TEST)" "ENABLE"
         CSOURCES += $(wildcard $(SPINOR_PATH)/*.c)
 endif
 
-RS485_TEST = ENABLE
+#RS485_TEST = ENABLE
 ifeq "$(RS485_TEST)" "ENABLE"
 	CFLAGS += -DRS485_TEST
 	# rs485 test
