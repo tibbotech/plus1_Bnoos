@@ -20,7 +20,7 @@ LDFLAGS = -T $(LD_FILE)
 LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
 #LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
 
-CFLAGS += -fno-builtin -O1
+CFLAGS += -fno-builtin -O1 -fno-stack-protector
 CFLAGS += -nostdlib -fno-builtin
 CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
 CFLAGS += -fno-partial-inlining -fno-jump-tables
