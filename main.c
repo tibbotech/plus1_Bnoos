@@ -149,12 +149,17 @@ int main(void)
 #endif
 
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
+	/*initial interrupt vector table*/
+	int_memcpy(0x00000000, __vectors_start, (unsigned)__vectors_end - (unsigned)__vectors_start);
+
 	ipc_init();
 
 #ifdef RS485_TEST
 	rs485_init(10,11,12);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO ,G_MX[12]_RTS
 #endif 
 
+    /* interrupt manager module init */
+	sp_interrupt_setup();
 	ipc_start();
 	printf("NonOS boot OK!!!\n");
 	task_dbg();
