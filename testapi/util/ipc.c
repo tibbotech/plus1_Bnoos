@@ -35,8 +35,8 @@ static int rpc_check_seq(rpc_t *rpc)
 	u32 *addr = rpc->SEQ_ADDR;
 	u32 t1 = AV1_GetStc32();
 	unsigned long timeout = 10; // 10ms
-	printf("seq:0x%x, seq_data:%0x\n", seq, *addr);
-	if(rpc->DATA_LEN < RPC_DATA_SIZE)
+	//printf("seq:0x%x, seq_data:%0x\n", seq, *addr);
+	if(rpc->DATA_LEN > RPC_DATA_SIZE)
 	{
 		while(*addr != seq) {
 			if((STC_get_timer(t1))>timeout) {
