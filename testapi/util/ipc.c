@@ -205,12 +205,19 @@ out:
 void ipc_response_Achip(int cmd)
 {
 	//send source data to A chip
-	int ret = IPC_SUCCESS;
+	int ret = IPC_SUCCESS, i;
+	BYTE *data_addr;
 	rpc_t *src = &IPC_REMOTE->RPC;
 	
 	src->F_DIR	 = RPC_RESPONSE;
 	src->F_TYPE	 = REQ_DEFER_REP;
 	src->CMD 	 = cmd;
+
+    data_addr = &(src->DATA[0]);
+	for(i=0;i<ipc_data.rpc.DATA_LEN;i++)
+	{
+	    *(data_addr+i)= ipc_data.rpc.CMD; //Response data is cmd id.		
+	}	
 
 	ret = ipc_write_enable(IPC_WRITEENABLE_MASK);
 	if (ret)
