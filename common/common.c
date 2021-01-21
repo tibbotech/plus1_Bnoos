@@ -1,4 +1,5 @@
 #include <types.h>
+#if 0
 int memcmp(UINT8 *s1, UINT8 *s2, int n)
 {
 	int ret = 0;
@@ -38,3 +39,4 @@ int strlen(const char * str)
 	while (*str) str++;
 	return str - start;
 }
+#endif

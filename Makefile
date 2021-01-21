@@ -17,8 +17,8 @@ TARGET = rom
 LD_FILE = rom.ld
 LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
-LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
-#LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
+#LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
+LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
 
 CFLAGS += -fno-builtin -O1
 CFLAGS += -nostdlib -fno-builtin
