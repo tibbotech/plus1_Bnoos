@@ -1,7 +1,7 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-
+#include <stdlib.h>
 
 typedef unsigned long long  u64;
 typedef unsigned int        u32;

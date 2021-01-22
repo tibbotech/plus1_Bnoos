@@ -144,6 +144,14 @@ int main(void)
 #ifdef A_and_B_chip
 int main(void)
 {
+#if 0 // MALLOC_TEST
+	void *p1 = malloc(1 * 1024 * 1024);
+	void *p2 = malloc(2 * 1024 * 1024);
+	printf("MALLOC_TEST: %08x %08x\n", p1 , p2);
+	free(p1);
+	free(p2);
+#endif
+
 #ifdef I2C_TEST
     unsigned int test;
 #endif

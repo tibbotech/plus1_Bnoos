@@ -4,7 +4,9 @@
 
 #define STACK_SIZE 8*1024
 
-.equ _ISR_STARTADDRESS, STACK_SRAM
+.global __sp_init
+
+.equ _ISR_STARTADDRESS, __sp_init
 .equ UserStack, _ISR_STARTADDRESS
 .equ SVCStack, UserStack-STACK_SIZE
 .equ UndefStack, SVCStack-STACK_SIZE

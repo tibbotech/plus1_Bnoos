@@ -39,4 +39,13 @@ int strlen(const char * str)
 	while (*str) str++;
 	return str - start;
 }
+#else
+extern char __bss_end__;
+void * _sbrk(int incr)
+{
+	static void *heapP = &__bss_end__;
+	void *ret = heapP;
+	heapP += incr;
+	return ret;
+}
 #endif

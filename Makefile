@@ -3,6 +3,7 @@ LIB = lib
 TESTAPI = testapi
 
 #CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
+CROSS = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
 ifneq ($(CROSS),)
 CC = $(CROSS)gcc
 LD = $(CROSS)ld
@@ -109,7 +110,7 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 
 .PHONY: clean all
 
-all: clean $(BIN)/$(TARGET).bin
+all: clean $(BIN)/$(TARGET).bin pack
 	
 
 $(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
@@ -123,6 +124,15 @@ $(BIN)/$(TARGET): $(OBJS) $(LD_FILE)
 
 $(LD_FILE): $(LD_SRC) $(OBJS)
 	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
+
+pack:
+	@# Add image header
+	@echo "Wrap code image..."
+	@bash ./script/add_uhdr.sh uboot_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200040 0x200040
+	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
+	dd if=prebuilt/xboot_nor.img of=bin/spi_all.bin bs=1k seek=64
+	dd if=bin/rom.img of=bin/spi_all.bin bs=1k seek=256
+	dd if=bin/rom.img of=bin/out.bin 
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
