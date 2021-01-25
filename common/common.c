@@ -41,11 +41,31 @@ int strlen(const char * str)
 }
 #else
 extern char __bss_end__;
+char linebuf[300];
 void * _sbrk(int incr)
 {
 	static void *heapP = &__bss_end__;
 	void *ret = heapP;
 	heapP += incr;
 	return ret;
+}
+
+void abort(void)
+{
+	while (1);
+}
+
+void _exit(int c)
+{
+	abort();
+}
+
+void _kill(int pid, int signal)
+{
+}
+
+int _getpid(void)
+{
+	return 0;
 }
 #endif

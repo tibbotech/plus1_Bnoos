@@ -163,6 +163,9 @@ int main(void)
 	rs485_init(10,11,12);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO ,G_MX[12]_RTS
 #endif 
 
+	extern void test(void);
+	test();
+
 	ipc_start();
 	printf("NonOS boot OK!!!\n");
 	task_dbg();

@@ -6,6 +6,7 @@ TESTAPI = testapi
 CROSS = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
 ifneq ($(CROSS),)
 CC = $(CROSS)gcc
+CXX = $(CROSS)g++
 LD = $(CROSS)ld
 CPP = $(CROSS)cpp
 OBJCOPY = $(CROSS)objcopy
@@ -19,16 +20,16 @@ LD_FILE = rom.ld
 LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
 #LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
-LDFLAGS_COM := -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lgcc -lc
+LDFLAGS_COM = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lstdc++ -lm -lc -lgcc
 
-CFLAGS += -fno-builtin -O1
+CFLAGS += -O1
 CFLAGS += -nostdlib -fno-builtin
 CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
 CFLAGS += -fno-partial-inlining -fno-jump-tables
 CFLAGS += -static
 CFLAGS += -nodefaultlibs
 CFALGS += -ffunction-sections -fdata-sections -flto
-CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable -Wno-implicit-function-declaration
+CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable
 CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
 
 #-mthumb -mthumb-interwork
@@ -54,7 +55,11 @@ CSOURCES += mon/monitor.c
 CSOURCES += $(TESTAPI)/interrupt/sp_interrupt.c
 ASOURCES += $(TESTAPI)/interrupt/vectors.S
 
-
+# Marlin
+CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
+CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=3 -D__AVR_ATmega2560__
+CXXFLAGS += -IMarlin/include -IMarlin/arduino
+CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp
 
 #I2C_TEST = ENABLE
 ifeq "$(I2C_TEST)" "ENABLE"
@@ -105,7 +110,7 @@ endif
 
 CFLAGS += -DIPC_TEST
 
-OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
+OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
 
 
 .PHONY: clean all

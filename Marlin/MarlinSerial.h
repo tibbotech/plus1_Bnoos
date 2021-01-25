@@ -43,6 +43,7 @@
 
 // Registers used by MarlinSerial class (these are expanded 
 // depending on selected serial port
+#if 0
 #define M_UCSRxA SERIAL_REGNAME(UCSR,SERIAL_PORT,A) // defines M_UCSRxA to be UCSRnA where n is the serial port number
 #define M_UCSRxB SERIAL_REGNAME(UCSR,SERIAL_PORT,B) 
 #define M_RXENx SERIAL_REGNAME(RXEN,SERIAL_PORT,)    
@@ -55,8 +56,12 @@
 #define M_RXCx SERIAL_REGNAME(RXC,SERIAL_PORT,)
 #define M_USARTx_RX_vect SERIAL_REGNAME(USART,SERIAL_PORT,_RX_vect)
 #define M_U2Xx SERIAL_REGNAME(U2X,SERIAL_PORT,)
-
-
+#else
+#include <types.h>
+#include <common.h>
+#include <config.h>
+#include <emuio.h>
+#endif
 
 #define DEC 10
 #define HEX 16
@@ -102,17 +107,14 @@ class MarlinSerial //: public Stream
     
     FORCE_INLINE void write(uint8_t c)
     {
-      while (!((M_UCSRxA) & (1 << M_UDREx)))
-        ;
-
-      M_UDRx = c;
+		UART_putc(c);
     }
     
     
     FORCE_INLINE void checkRx(void)
     {
-      if((M_UCSRxA & (1<<M_RXCx)) != 0) {
-        unsigned char c  =  M_UDRx;
+      if(UART_rx_rdy()) {
+        unsigned char c  =  UART_getc();
         int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
         // if we should be storing the received character into the location
@@ -146,14 +148,14 @@ class MarlinSerial //: public Stream
       while (size--)
         write(*buffer++);
     }
-
+#if 0
     FORCE_INLINE void print(const String &s)
     {
       for (int i = 0; i < (int)s.length(); i++) {
         write(s[i]);
       }
     }
-    
+#endif
     FORCE_INLINE void print(const char *str)
     {
       write(str);
@@ -166,7 +168,7 @@ class MarlinSerial //: public Stream
     void print(unsigned long, int = DEC);
     void print(double, int = 2);
 
-    void println(const String &s);
+    //void println(const String &s);
     void println(const char[]);
     void println(char, int = BYTE);
     void println(unsigned char, int = BYTE);

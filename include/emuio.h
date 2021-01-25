@@ -4,7 +4,7 @@
 extern int psprintf(char *dest, const char *format, ...);
 extern void io_write_wait(const char *s);
 
-char linebuf[300];
+extern char linebuf[];
 
 #define dbg_info()	_dbg_info(__FILE__, __LINE__)
 #define dbg()		_dbg_info(__FILE__, __LINE__)

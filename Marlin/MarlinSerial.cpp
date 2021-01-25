@@ -69,6 +69,7 @@ MarlinSerial::MarlinSerial()
 
 void MarlinSerial::begin(long baud)
 {
+#if 0
   uint16_t baud_setting;
   bool useU2X = true;
 
@@ -96,13 +97,16 @@ void MarlinSerial::begin(long baud)
   sbi(M_UCSRxB, M_RXENx);
   sbi(M_UCSRxB, M_TXENx);
   sbi(M_UCSRxB, M_RXCIEx);
+#endif
 }
 
 void MarlinSerial::end()
 {
+#if 0
   cbi(M_UCSRxB, M_RXENx);
   cbi(M_UCSRxB, M_TXENx);
   cbi(M_UCSRxB, M_RXCIEx);  
+#endif
 }
 
 
@@ -201,13 +205,13 @@ void MarlinSerial::println(void)
   print('\r');
   print('\n');  
 }
-
+#if 0
 void MarlinSerial::println(const String &s)
 {
   print(s);
   println();
 }
-
+#endif
 void MarlinSerial::println(const char c[])
 {
   print(c);
