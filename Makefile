@@ -115,7 +115,7 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
 
 .PHONY: clean all
 
-all: clean $(BIN)/$(TARGET).bin pack
+all: $(BIN)/$(TARGET).bin pack
 	
 
 $(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
