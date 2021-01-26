@@ -322,12 +322,13 @@ int  _strncmp( const char *s1 , const char *s2 , int n)
 	return (*(unsigned char *) s1) - (*(unsigned char *) s2);
 }
 
+int uart_read(void);
 
 //stdlib
  int polling_io(void)
 {
-	while (UART_rx_rdy()) {
-		int c = UART_getc();
+	int c = uart_read();
+	if (c != -1) {
 		if (c == 'm')
 			key_trick = 1;
 		else if (c == 'o')
@@ -421,14 +422,17 @@ static int mon_read(char *buf, int maxl, char *last)
 	if (buf == NULL) return 0;
 
 	do {
-
+#if 1
+		c = uart_read();
+		if (c == -1) continue;
+#else
 		if (!UART_rx_rdy()) {
 			//cpu_intr_enable();    // wait a character
 			continue;
 		}
 
 		c = UART_getc();           // get input char
-
+#endif
 		if (c == 27) return -1; // ESC cancel command
 		if (c == '\r' || c == '\n') {
 			buf[L] = '\0';

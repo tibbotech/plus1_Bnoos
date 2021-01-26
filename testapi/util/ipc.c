@@ -231,8 +231,6 @@ void ipc_callback(void)
 {
 	rpc_t *src = &IPC_REMOTE->RPC;
 
-	hal_interrupt_acknowledge(MAILBOX_INT);
-	
 	memset(&ipc_data.rpc,0,sizeof(rpc_t));
 	ipc_copy(&ipc_data.rpc,&IPC_REMOTE->RPC);
 	

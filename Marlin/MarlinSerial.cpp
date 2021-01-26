@@ -55,7 +55,21 @@ FORCE_INLINE void store_char(unsigned char c)
   {
     unsigned char c  =  M_UDRx;
     store_char(c);
-  }
+ }
+#else
+extern "C" void uart_isr(void);
+extern "C" int uart_read(void);
+void uart_isr(void)
+{
+	unsigned char c = UART_getc();
+	store_char(c);
+	//UART_putc(c);
+}
+
+int uart_read(void)
+{
+	return MSerial.read();
+}
 #endif
 
 // Constructors ////////////////////////////////////////////////////////////////

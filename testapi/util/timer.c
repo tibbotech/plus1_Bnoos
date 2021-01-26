@@ -58,7 +58,6 @@ static void timer3_isr_cfg()
 
 void timer3_callback(void)
 {
-	hal_interrupt_acknowledge(TIMER3_INT);
 	printf("@Hello[%d]\n", ++g_repeat_cnt);
 }
 

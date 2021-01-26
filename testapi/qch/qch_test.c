@@ -128,7 +128,6 @@ int __attribute__((optimize("O0"))) qch_access_protect_routine(unsigned int qid,
 
 void qch_timer_callback(void)
 {
-	hal_interrupt_acknowledge(154);
 	volatile struct moon0_regs *moon0 = MOON0_REG;
 	int rtn;
 

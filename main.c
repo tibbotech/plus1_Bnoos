@@ -36,7 +36,6 @@ u8	tx_buf[255];
 #ifdef INTR_SAMPLE
 void gpio_int_0_callback(void)
 {
-	hal_interrupt_acknowledge(120);
 	printf("GPIO_INT_0\n");
 
 }
@@ -142,6 +141,27 @@ int main(void)
 #endif 
 
 #ifdef A_and_B_chip
+
+#include "sp_interrupt.h"
+
+#define UART0_INT 53
+static void uart_irq_config()
+{
+	printf("[CFG] uart\n");
+	hal_interrupt_configure(UART0_INT, 1, 1); // Level high trigger
+	UART_REG->isc = (1 << 5); // RX interrupt enable
+	hal_interrupt_unmask(UART0_INT); // enable UART0_INT
+}
+
+void uart_isr(void);
+
+interrupt_operation uart_opt = {
+	.dev_name = "uart",
+	.vector = UART0_INT,
+	.device_config = uart_irq_config,
+	.interrupt_handler = uart_isr,
+};
+
 int main(void)
 {
 #if 0 // MALLOC_TEST
@@ -157,16 +177,25 @@ int main(void)
 #endif
 
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
-	ipc_init();
+	hw_init();
+	AV1_STC_init();
+	
+	/*initial interrupt vector table*/
+	int_memcpy(0x00000000, __vectors_start, (unsigned)__vectors_end - (unsigned)__vectors_start);
+
+	timer_test_init();
+	interrupt_register(&uart_opt);
 
 #ifdef RS485_TEST
 	rs485_init(10,11,12);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO ,G_MX[12]_RTS
 #endif 
 
-	extern void test(void);
-	test();
+	void test(void);
+	test(); // call Marlin test function
 
-	ipc_start();
+	sp_interrupt_setup();
+	//timer_test();
+
 	printf("NonOS boot OK!!!\n");
 	task_dbg();
 	while(1);

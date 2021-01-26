@@ -50,14 +50,12 @@ void fs_intr_onoff(int onoff)
 
 void noc_perf_fs(void)
 {
-	hal_interrupt_acknowledge(0);
 	printf("@\n");
 	return;
 }
 
 void noc_perf_log(void)
 {
-	hal_interrupt_acknowledge(154);
 	printf("@timer\n");
 	return;
 }

@@ -45,9 +45,9 @@ static void interrupt_disable(void)
 static int check_int_opt(interrupt_operation *int_opt)
 {
     if (int_opt->vector < IRQS) {
-        printf("check_int_opt: [vector] pass \n");
+        printf("check_int_opt_%d: [vector] pass \n", int_opt->vector);
         if (int_opt->device_config != 0 && ((int_opt->interrupt_handler != 0) || (int_opt->interrupt_handler_with_vector != 0))) {
-            printf("check_int_opt: [callback] pass \n");
+            printf("check_int_opt_%d: [callback] pass \n", int_opt->vector);
             return 0;
         } else {
             return -1;
@@ -108,6 +108,7 @@ static void excute_int_config_opt(void)
 static void excute_int_handler(unsigned vector)
 {
     if (vector < IRQS) {
+		hal_interrupt_acknowledge(vector); // ack
         if (int_opt_table[vector] != 0) {
             if ((int_opt_table[vector])->interrupt_handler != 0) {
                 (int_opt_table[vector])->interrupt_handler();
@@ -115,8 +116,6 @@ static void excute_int_handler(unsigned vector)
             if (int_opt_table[vector]->interrupt_handler_with_vector != 0) {
                 int_opt_table[vector]->interrupt_handler_with_vector(vector);
             }
-        } else {
-            hal_interrupt_acknowledge(vector);  //unhandled int ack
         }
     }
 }

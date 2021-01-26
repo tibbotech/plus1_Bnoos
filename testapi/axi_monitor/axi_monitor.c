@@ -46,8 +46,6 @@ void axi_mon_callback(void)
 	reg_axi_monitor_sub_t *axi_sub;
 	unsigned int record;
 
-	hal_interrupt_acknowledge(103);
-
 	printf("[AXI] device_id : %d\n", axi->global_monitor_config.bits.device_id);
 
 	switch(axi->global_monitor_config.bits.device_id)

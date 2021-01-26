@@ -118,7 +118,6 @@ void cbdma_interrupt_control_mask(int id, int enable)
 	unsigned int int_num = (id == 0)?128:129;
 
 	if (enable != 0) {
-		hal_interrupt_acknowledge(int_num);
 		hal_interrupt_unmask(int_num);
 	} else {
 		hal_interrupt_mask(int_num);
@@ -178,8 +177,6 @@ void cbdma0_isr_cfg()
 	cbdma_clear_interrupt_status(0);
 	cbdma_enable_interrupt(0, 1);
 	hal_interrupt_configure(128, 0, 1);
-	// why
-	hal_interrupt_acknowledge(128);
 }
 
 void cbdma1_isr_cfg()
@@ -188,8 +185,6 @@ void cbdma1_isr_cfg()
 	cbdma_clear_interrupt_status(1);
 	cbdma_enable_interrupt(1, 1);
 	hal_interrupt_configure(129, 0, 1);
-	// why
-	hal_interrupt_acknowledge(128);
 }
 
 
@@ -197,8 +192,6 @@ int g_cbmda_finished = 0;
 
 void cbdma0_isr(void)
 {
-	hal_interrupt_acknowledge(128);
-
 	printf("[CBDMA_%d]: Finished, status: 0x%x\n", 0, cbdma_get_interrupt_status(0));
 	g_cbmda_finished = 1;
 
@@ -207,7 +200,6 @@ void cbdma0_isr(void)
 
 void cbdma1_isr(void)
 {
-	hal_interrupt_acknowledge(129);
 	printf("[CBDMA_%d]: Finished, status: 0x%x\n", 0, cbdma_get_interrupt_status(1));
 	g_cbmda_finished = 1;
 
