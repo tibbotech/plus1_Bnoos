@@ -22,7 +22,7 @@ LDFLAGS = -T $(LD_FILE)
 #LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
 LDFLAGS_COM = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lstdc++ -lm -lc -lgcc
 
-CFLAGS += -O1
+CFLAGS += -MMD -O1
 CFLAGS += -nostdlib -fno-builtin
 CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
 CFLAGS += -fno-partial-inlining -fno-jump-tables
@@ -34,7 +34,7 @@ CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
 
 #-mthumb -mthumb-interwork
 
-SPI_ALL := romter.bin
+SPI_ALL := spi_all.bin
 SPI_HEX := spi_all.hex
 
 # Boot up
@@ -115,11 +115,10 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
 
 .PHONY: clean all
 
-all: $(BIN)/$(TARGET).bin pack
-	
+all: $(BIN)/$(SPI_ALL)
 
-$(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
-	@$(OBJCOPY) -O binary -S $(BIN)/$(TARGET) $@
+$(BIN)/$(TARGET).bin: $(BIN)/$(TARGET)
+	@$(OBJCOPY) -O binary -S $< $@
 
 $(BIN)/$(TARGET).dis: $(BIN)/$(TARGET)
 	@$(OBJDUMP) -d -S $< > $@
@@ -127,17 +126,16 @@ $(BIN)/$(TARGET).dis: $(BIN)/$(TARGET)
 $(BIN)/$(TARGET): $(OBJS) $(LD_FILE)
 	@$(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 
-$(LD_FILE): $(LD_SRC) $(OBJS)
-	@$(CPP) -P $(CFLAGS) -x c $(LD_SRC) -o $(LD_FILE)
+$(LD_FILE): $(LD_SRC)
+	@$(CPP) -P $(CFLAGS) -x c $< -o $@
 
-pack:
+$(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin
 	@# Add image header
 	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh uboot_B $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img 0x200040 0x200040
+	@bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
 	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
 	dd if=prebuilt/xboot_nor.img of=bin/spi_all.bin bs=1k seek=64
-	dd if=bin/rom.img of=bin/spi_all.bin bs=1k seek=256
-	dd if=bin/rom.img of=bin/out.bin 
+	dd if=bin/$(TARGET).img of=$@ bs=1k seek=256
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
@@ -162,10 +160,13 @@ up:
 
 
 clean:
-	@-rm -f $(OBJS) >/dev/null
-	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL).bin $(TARGET).map $(TARGET).dis >/dev/null
-	@-rm -f bin/out.bin $(LD_FILE) >/dev/null
+	@-rm -f $(OBJS) $(OBJS:.o=.d) rom.d >/dev/null
+	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
+	@-rm -f $(LD_FILE) >/dev/null
 
 
 p-%:
 	@echo "$* is '$($*)'"
+
+# Automaticaly include the dependency files created by gcc
+-include ${shell find -name "*.d"}
