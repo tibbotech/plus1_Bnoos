@@ -38,7 +38,7 @@ CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
 CFLAGS += -fno-partial-inlining -fno-jump-tables
 CFLAGS += -static
 CFLAGS += -nodefaultlibs
-CFALGS += -ffunction-sections -fdata-sections -flto
+CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable
 CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
 
@@ -67,8 +67,8 @@ ASOURCES += $(TESTAPI)/interrupt/vectors.S
 
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
-CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=3 -D__AVR_ATmega2560__
-CXXFLAGS += -IMarlin/include -IMarlin/arduino
+CFLAGS += -IMarlin/include -IMarlin/arduino
+CFLAGS += -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=3 -D__AVR_ATmega2560__
 CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp
 
 #I2C_TEST = ENABLE
@@ -152,13 +152,9 @@ $(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin Makefile
 	$(Pecho) "  CC   $<"
 	$P $(CC) $(CFLAGS) -c -o $@ $<
 
-%.o: %.c
+%.o: %.c*
 	$(Pecho) "  CC   $<"
 	$P $(CC) $(CFLAGS) -c -o $@ $<
-
-%.o: %.cpp
-	$(Pecho) "  CXX  $<"
-	$P $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 zmem: $(BIN)/zmem.hex
 $(BIN)/zmem.hex: $(TARGET)
