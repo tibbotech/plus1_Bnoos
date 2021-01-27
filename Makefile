@@ -38,7 +38,7 @@ CFLAGS += -fno-pie -fno-PIE -fno-pic -fno-PIC
 CFLAGS += -fno-partial-inlining -fno-jump-tables
 CFLAGS += -static
 CFLAGS += -nodefaultlibs
-CFALGS += -ffunction-sections -fdata-sections -flto
+CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable
 CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
 
@@ -53,7 +53,7 @@ CSOURCES = main.c
 
 # common
 
-CSOURCES += $(COMMON_DIR)/diag.c $(COMMON_DIR)/common.c $(COMMON_DIR)/sio.c $(COMMON_DIR)/cpu_util.c $(COMMON_DIR)/stc.c $(wildcard ./testapi/util/*.c)
+CSOURCES += $(COMMON_DIR)/diag.c $(COMMON_DIR)/common.c $(COMMON_DIR)/sio.c $(COMMON_DIR)/cpu_util.c $(COMMON_DIR)/stc.c $(wildcard $(TESTAPI)/util/*.c)
 CSOURCES += $(COMMON_DIR)/gpio_exp.c
 CSOURCES += $(COMMON_DIR)/eabi_compat.c
 #CSOURCES += $(COMMON_DIR)/uart_printf.c
@@ -70,9 +70,11 @@ CSOURCES += Marlin/arduino/wiring_digital.c
 
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
+
 CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
 CXXFLAGS += -IMarlin/include -IMarlin/arduino
 CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp Marlin/stepper.cpp Marlin/planner.cpp
+
 
 #I2C_TEST = ENABLE
 ifeq "$(I2C_TEST)" "ENABLE"
@@ -121,7 +123,7 @@ ifeq "$(RS485_TEST)" "ENABLE"
 	CSOURCES += $(wildcard $(RS485_PATH)/*.c)
 endif
 
-CFLAGS += -DIPC_TEST
+#CFLAGS += -DIPC_TEST
 
 OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
 
@@ -155,13 +157,9 @@ $(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin Makefile
 	$(Pecho) "  CC   $<"
 	$P $(CC) $(CFLAGS) -c -o $@ $<
 
-%.o: %.c
+%.o: %.c*
 	$(Pecho) "  CC   $<"
 	$P $(CC) $(CFLAGS) -c -o $@ $<
-
-%.o: %.cpp
-	$(Pecho) "  CXX  $<"
-	$P $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 zmem: $(BIN)/zmem.hex
 $(BIN)/zmem.hex: $(TARGET)

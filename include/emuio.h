@@ -7,7 +7,7 @@
 #define EXTERN extern
 #endif
 
-EXTERN void uart_isr(void);
+EXTERN void uart_isr(int vector);
 EXTERN int uart_read(void); // return -1 means no data
 
 extern int psprintf(char *dest, const char *format, ...);

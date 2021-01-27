@@ -57,7 +57,7 @@ FORCE_INLINE void store_char(unsigned char c)
     store_char(c);
  }
 #else
-void uart_isr(void)
+void uart_isr(int vector)
 {
 	unsigned char c = UART_getc();
 	store_char(c);

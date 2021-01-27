@@ -9,16 +9,7 @@
 
 #include "config.h"
 
-// typedef unsigned long       size_t;
-
-/* Fix spelling error */
-typedef struct __interrupt_operation{
-	char dev_name[8]; 				/* interrupt devce name */
-	size_t vector;					/* interrupt vector used to indentify interrupt */
-	void (*device_config)();		/* user interrupt config function */
-	void (*interrupt_handler)();	/* user interrupt handler function */
-	void (*interrupt_handler_with_vector)(int vec);  /* user interrupt handler function vith parm */
-} interrupt_operation;
+typedef void (*isr_t)(int);
 
 // 8388 SPINTC (A926: 0~199, DSP: 0~199)
 // 9C000480
@@ -81,21 +72,21 @@ typedef struct __interrupt_operation{
 
 #else
 
-	#define portDISABLE_INTERRUPTS() do{prn_string("disable int\n");											\
+	#define portDISABLE_INTERRUPTS() do{ \
 		asm volatile (															\
 			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
 			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
 			"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.			*/	\
 			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/ ;prn_string("int disabled\n");}while(0)
+			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/ ;} while(0)
 
-	#define portENABLE_INTERRUPTS()	do{prn_string("enable int\n");											\
+	#define portENABLE_INTERRUPTS()	do{ \
 		asm volatile (															\
 			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
 			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
 			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	\
 			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/ ;prn_string("int enabled\n");}while(0)
+			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/ ;} while(0)
 
 #endif /* THUMB_INTERWORK */
 
@@ -121,10 +112,10 @@ void sp_interrupt_setup();
 void sp_interrupt_disable();
 
 /* invoked by interrupt driver */
-int interrupt_register(interrupt_operation *int_opt);
+int interrupt_register(int vector, const char *name, isr_t isr, int type); // type: 0-edge 1-level
 
 /* invoked by interrupt driver */
-int interrupt_unregister(interrupt_operation *int_opt);
+int interrupt_unregister(int vector);
 
 void hal_interrupt_configure(int vector, int level, int up);
 void hal_interrupt_unmask(int vector);

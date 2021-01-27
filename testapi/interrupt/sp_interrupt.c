@@ -12,7 +12,7 @@ void _IRQ_handler( void ) __attribute__ ((naked));
 void _FIRQ_handler( void ) __attribute__ ((naked));
 
 #define IRQS        (32 * 7)
-interrupt_operation  *int_opt_table[IRQS] = {0};
+isr_t isr_table[IRQS] = {0};
 
 static void interrupt_reset(void)
 {
@@ -40,21 +40,6 @@ static void interrupt_enable(void)
 static void interrupt_disable(void)
 {
     portDISABLE_INTERRUPTS();
-}
-
-static int check_int_opt(interrupt_operation *int_opt)
-{
-    if (int_opt->vector < IRQS) {
-        printf("check_int_opt_%d: [vector] pass \n", int_opt->vector);
-        if (int_opt->device_config != 0 && ((int_opt->interrupt_handler != 0) || (int_opt->interrupt_handler_with_vector != 0))) {
-            printf("check_int_opt_%d: [callback] pass \n", int_opt->vector);
-            return 0;
-        } else {
-            return -1;
-        }
-    } else {
-        return -1;
-    }
 }
 
 static unsigned lookup_vector(void)
@@ -92,30 +77,12 @@ static unsigned lookup_vector(void)
     return vector;
 }
 
-static void excute_int_config_opt(void)
-{
-    size_t i = 0;
-    prn_string("Enter excute_int_config_opt() \n");
-    while (i < IRQS) {
-        if (int_opt_table[i] != 0) {
-            (int_opt_table[i])->device_config();
-        }
-        i++;
-    }
-    prn_string("Exit excute_int_config_opt() \n");
-}
-
 static void excute_int_handler(unsigned vector)
 {
     if (vector < IRQS) {
 		hal_interrupt_acknowledge(vector); // ack
-        if (int_opt_table[vector] != 0) {
-            if ((int_opt_table[vector])->interrupt_handler != 0) {
-                (int_opt_table[vector])->interrupt_handler();
-            }
-            if (int_opt_table[vector]->interrupt_handler_with_vector != 0) {
-                int_opt_table[vector]->interrupt_handler_with_vector(vector);
-            }
+        if (isr_table[vector] != 0) {
+            (isr_table[vector])(vector);
         }
     }
 }
@@ -123,21 +90,13 @@ static void excute_int_handler(unsigned vector)
 /* invoked by interrupt manager module */
 void sp_interrupt_setup()
 {
-    prn_string("Enter sp_interrupt_setup() \n");
-
+    //prn_string("Enter sp_interrupt_setup() \n");
     interrupt_disable();
-    prn_string("intr reset\n");
+    //prn_string("intr reset\n");
     interrupt_reset();
-
-    prn_string("reset done.");
-    /* interrupt configuration registed by driver invoked here */
-    excute_int_config_opt();
-
-    prn_string("config opt done.");
-    /* enable interrupt */
+    //prn_string("reset done.");
     interrupt_enable();
-
-    prn_string("Exit sp_interrupt_setup() \n");
+    //prn_string("Exit sp_interrupt_setup() \n");
 }
 
 /* invoked by interrupt manager module */
@@ -147,26 +106,21 @@ void sp_interrupt_disable()
 }
 
 /* invoked by interrupt driver */
-int interrupt_register(interrupt_operation *int_opt)
+int interrupt_register(int vector, const char *name, isr_t isr, int type)
 {
-    if (check_int_opt(int_opt) < 0) {
-        return -1;
-    }
-
-    int_opt_table[int_opt->vector] = int_opt;
-
-    // prn_string("interrupt_register successfully \n");
+    isr_table[vector] = isr;
+	hal_interrupt_configure(vector, type, 1); // level high/edge rising
+	hal_interrupt_unmask(vector); // enable intr
+	printf("Registered IRQ_%d %s!\n", vector, name);
     return 0;
 }
 
 /* invoked by interrupt driver */
-int interrupt_unregister(interrupt_operation *int_opt)
+int interrupt_unregister(int vector)
 {
-    if (check_int_opt(int_opt) < 0) {
-        return -1;
-    }
-    int_opt_table[int_opt->vector] = 0;
-    // prn_string("interrupt_unregister successfully \n");
+	hal_interrupt_mask(vector); // disable intr
+    isr_table[vector] = 0;
+	printf("Unregistered IRQ_%d!\n", vector);
     return 0;
 }
 

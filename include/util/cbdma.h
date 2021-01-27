@@ -41,5 +41,4 @@ void cbdma_test_init();
 // mon cbdma
 void cbdma_test();
 
-extern int g_cbmda_finished;
 #endif // __CBDMA_H__
