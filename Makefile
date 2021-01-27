@@ -65,11 +65,14 @@ CSOURCES += mon/monitor.c
 CSOURCES += $(TESTAPI)/interrupt/sp_interrupt.c
 ASOURCES += $(TESTAPI)/interrupt/vectors.S
 
+# ardunio C source
+CSOURCES += Marlin/arduino/wiring_digital.c
+
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
-CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=3 -D__AVR_ATmega2560__
+CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
 CXXFLAGS += -IMarlin/include -IMarlin/arduino
-CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp
+CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp Marlin/stepper.cpp Marlin/planner.cpp
 
 #I2C_TEST = ENABLE
 ifeq "$(I2C_TEST)" "ENABLE"

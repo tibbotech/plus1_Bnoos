@@ -23,7 +23,42 @@
 
   $Id: wiring.c 248 2007-02-03 15:36:30Z mellis $
 */
+#define WiringPrivate_h
+#include <math.h>
+#include <stdio.h>
+#include <stdarg.h>
+//#include <avr/io.h>
+#include "gpio_drv.h"
+#include "wiring.h"
 
+
+void pinMode(uint8_t pin, uint8_t mode)
+{
+	GPIO_F_SET(pin, 1);
+	GPIO_M_SET(pin, 1);
+	if (mode == INPUT)
+	{
+		GPIO_E_SET(pin, 0);
+	}else{
+		GPIO_E_SET(pin, 1);
+	}
+		
+}
+
+void digitalWrite(uint8_t pin, uint8_t val)
+{
+	GPIO_O_SET(pin, val);
+}
+
+int digitalRead(uint8_t pin)
+{
+	return GPIO_I_GET(pin);
+}
+
+
+
+
+#if 0
 #include "wiring_private.h"
 #include "pins_arduino.h"
 
@@ -164,3 +199,4 @@ int digitalRead(uint8_t pin)
 	if (*portInputRegister(port) & bit) return HIGH;
 	return LOW;
 }
+#endif

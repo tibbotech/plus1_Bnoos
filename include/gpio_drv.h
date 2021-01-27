@@ -208,6 +208,7 @@ extern u32 gpio_pin_mux_get(PMXSEL_ID id);
                                 gpio_first_0(a); \
                             } \
                         } while(0)
+//@a:gpio number, @d 1:enable gpio function, 0:disable gpio function, the pin for other function mode                          
 #define GPIO_F_GET(a)	gpio_first_val_get(a)
 
 #define GPIO_M_SET(a,d) do { \
