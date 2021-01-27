@@ -1,3 +1,13 @@
+# set V=1 (eg, "make V=1") to print the full commands etc.
+ifneq ($V,1)
+ Pecho=@echo
+ P=@
+else
+ Pecho=@:
+ P=
+endif
+DD = dd status=none bs=1k of=$@ seek=
+
 COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
@@ -118,55 +128,59 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
 all: $(BIN)/$(SPI_ALL)
 
 $(BIN)/$(TARGET).bin: $(BIN)/$(TARGET)
-	@$(OBJCOPY) -O binary -S $< $@
+	$P $(OBJCOPY) -O binary -S $< $@
 
 $(BIN)/$(TARGET).dis: $(BIN)/$(TARGET)
-	@$(OBJDUMP) -d -S $< > $@
+	$P $(OBJDUMP) -d -S $< > $@
 
 $(BIN)/$(TARGET): $(OBJS) $(LD_FILE)
-	@$(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
+	$(Pecho) "  LD   $@"
+	$P $(LD) $(OBJS) -o $(BIN)/$(TARGET) -Map $(BIN)/$(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 
 $(LD_FILE): $(LD_SRC)
-	@$(CPP) -P $(CFLAGS) -x c $< -o $@
+	$P $(CPP) -P $(CFLAGS) -x c $< -o $@
 
-$(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin
-	@# Add image header
-	@echo "Wrap code image..."
-	@bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
-	@sz=`du -sb bin/$(TARGET).img|cut -f1`;	printf "rom size = %d (hex %x)\n" $$sz $$sz
-	dd if=prebuilt/xboot_nor.img of=bin/spi_all.bin bs=1k seek=64
-	dd if=bin/$(TARGET).img of=$@ bs=1k seek=256
+$(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin Makefile
+	$(Pecho) "  PACK $@"
+	$P bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
+	$P $(DD)64  if=prebuilt/xboot_nor.img
+	$P $(DD)256 if=$(BIN)/$(TARGET).img
+	$P ls -l $@
 
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
-	@$(CC) $(CFLAGS) -c -o $@ $<
-
+	$(Pecho) "  CC   $<"
+	$P $(CC) $(CFLAGS) -c -o $@ $<
 
 %.o: %.c
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	$(Pecho) "  CC   $<"
+	$P $(CC) $(CFLAGS) -c -o $@ $<
 
+%.o: %.cpp
+	$(Pecho) "  CXX  $<"
+	$P $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 zmem: $(BIN)/zmem.hex
 $(BIN)/zmem.hex: $(TARGET)
 # 	args: input_elf output_hex tool_chain_location
-	@python ./script/tools/elf2mem.py $(BIN)/$< $@ $(READELF)
-	@echo "Gen $@ finished."
-	@${MAKE} up
+	$P python ./script/tools/elf2mem.py $(BIN)/$< $@ $(READELF)
+	$(Pecho) "Gen $@ finished."
+	$P ${MAKE} up
 
 up:
-	@echo "Upload to vnc3"
-	@~/util/ftp_upload.sh vnc3 $(BIN)/zmem.hex /home/nzlu/ftp
-	@echo "Upload done"
+	$(Pecho) "Upload to vnc3"
+	$P ~/util/ftp_upload.sh vnc3 $(BIN)/zmem.hex /home/nzlu/ftp
+	$(Pecho) "Upload done"
 
 
 clean:
-	@-rm -f $(OBJS) $(OBJS:.o=.d) rom.d >/dev/null
-	@-cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
-	@-rm -f $(LD_FILE) >/dev/null
+	$P -rm -f $(OBJS) $(OBJS:.o=.d) rom.d >/dev/null
+	$P -cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
+	$P -rm -f $(LD_FILE) >/dev/null
 
 
 p-%:
-	@echo "$* is '$($*)'"
+	$(Pecho) "$* is '$($*)'"
 
 # Automaticaly include the dependency files created by gcc
 -include ${shell find -name "*.d"}
