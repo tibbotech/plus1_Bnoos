@@ -141,24 +141,11 @@ int main(void)
 #endif 
 
 #ifdef A_and_B_chip
-
-#include "sp_interrupt.h"
-
-#define UART0_INT 53
-static void uart_irq_config()
+void uart_isr_init(void)
 {
-	printf("[CFG] uart\n");
-	hal_interrupt_configure(UART0_INT, 1, 1); // Level high trigger
 	UART_REG->isc = (1 << 5); // RX interrupt enable
-	hal_interrupt_unmask(UART0_INT); // enable UART0_INT
+	interrupt_register(53, "UART0", uart_isr, 1);
 }
-
-interrupt_operation uart_opt = {
-	.dev_name = "uart",
-	.vector = UART0_INT,
-	.device_config = uart_irq_config,
-	.interrupt_handler = uart_isr,
-};
 
 int main(void)
 {
@@ -180,15 +167,16 @@ int main(void)
 	
 	/*initial interrupt vector table*/
 	int_memcpy(0x00000000, __vectors_start, (unsigned)__vectors_end - (unsigned)__vectors_start);
+	sp_interrupt_setup();
 
 	timer_test_init();
-	interrupt_register(&uart_opt);
+	cbdma_test_init();
+	uart_isr_init();
 
 #ifdef RS485_TEST
 	rs485_init(10,11,12);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO ,G_MX[12]_RTS
 #endif 
 
-	sp_interrupt_setup();
 	//timer_test();
 
 	printf("NonOS boot OK!!!\n");

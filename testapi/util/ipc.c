@@ -262,39 +262,13 @@ void ipc_test(int argc, char *argv[])
 	ipc_send_to_Achip(0,data,len);
 }
 
-
-//**********  interrupt config ********************
-void ipc_interrupt_control_mask(int enable)
-{
-	if (enable != 0) {
-		/* enable timer0 interrupt */
-		hal_interrupt_unmask(MAILBOX_INT);
-	} else {
-		hal_interrupt_mask(MAILBOX_INT);
-	}
-}
-
-static void ipc_isr_cfg()
-{
-	printf("[CFG] ipc\n");
-	hal_interrupt_configure(MAILBOX_INT, 0, 1);
-}
-
 void ipc_init()
 {
-	static interrupt_operation ipc_opt;
-
-	memcpy(ipc_opt.dev_name, "ipc", strlen("ipc"));
-	ipc_opt.vector = MAILBOX_INT;
-	ipc_opt.device_config = ipc_isr_cfg;
-	ipc_opt.interrupt_handler = ipc_callback;
-	interrupt_register(&ipc_opt);
+	interrupt_register(MAILBOX_INT, "MAILBOX", ipc_callback, 0);
 }
 
 void ipc_start()
 {
 	memset(&ipc_data,0,sizeof(st_ipc));
 	printf("ipc test start!\n");
-	ipc_interrupt_control_mask(1);
-
 }

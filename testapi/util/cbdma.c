@@ -171,58 +171,22 @@ unsigned int check_sequential_pattern(unsigned int *dst, unsigned int len)
 
 // ===================== TEST ==============================
 
-void cbdma0_isr_cfg()
+volatile int g_cbmda_finished = 0;
+
+void cbdma_isr(int vector)
 {
-	printf("[CFG] CBDMA0 ISR\n");
-	cbdma_clear_interrupt_status(0);
-	cbdma_enable_interrupt(0, 1);
-	hal_interrupt_configure(128, 0, 1);
-}
-
-void cbdma1_isr_cfg()
-{
-	printf("[CFG] CBDMA1 ISR\n");
-	cbdma_clear_interrupt_status(1);
-	cbdma_enable_interrupt(1, 1);
-	hal_interrupt_configure(129, 0, 1);
-}
-
-
-int g_cbmda_finished = 0;
-
-void cbdma0_isr(void)
-{
-	printf("[CBDMA_%d]: Finished, status: 0x%x\n", 0, cbdma_get_interrupt_status(0));
+	int ch = vector - 128;
+	printf("[CBDMA_%d]: Finished, status: 0x%x\n", ch, cbdma_get_interrupt_status(ch));
 	g_cbmda_finished = 1;
 
-	cbdma_clear_interrupt_status(0);
-}
-
-void cbdma1_isr(void)
-{
-	printf("[CBDMA_%d]: Finished, status: 0x%x\n", 0, cbdma_get_interrupt_status(1));
-	g_cbmda_finished = 1;
-
-	cbdma_clear_interrupt_status(1);
+	cbdma_clear_interrupt_status(ch);
 }
 
 
 void cbdma_test_init()
 {
-	static interrupt_operation cbdma_opt[2];
-
-	memcpy(cbdma_opt[0].dev_name, "CBDMA0", strlen("CBDMA0"));
-	cbdma_opt[0].vector = 128;
-	cbdma_opt[0].device_config = cbdma0_isr_cfg;
-	cbdma_opt[0].interrupt_handler = cbdma0_isr;
-	interrupt_register(&cbdma_opt[0]);
-
-	memcpy(cbdma_opt[1].dev_name, "CBDMA1", strlen("CBDMA1"));
-	cbdma_opt[1].vector = 129;
-	cbdma_opt[1].device_config = cbdma1_isr_cfg;
-	cbdma_opt[1].interrupt_handler = cbdma1_isr;
-	interrupt_register(&cbdma_opt[1]);
-
+	interrupt_register(128, "CBDMA0", cbdma_isr, 0);
+	interrupt_register(129, "CBDMA1", cbdma_isr, 0);
 }
 
 
