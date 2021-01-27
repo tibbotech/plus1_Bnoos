@@ -70,9 +70,8 @@ CSOURCES += Marlin/arduino/wiring_digital.c
 
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
-
-CXXFLAGS = $(CFLAGS) -MMD -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
-CXXFLAGS += -IMarlin/include -IMarlin/arduino
+CFLAGS += -IMarlin/include -IMarlin/arduino
+CFLAGS += -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
 CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp Marlin/stepper.cpp Marlin/planner.cpp
 
 
