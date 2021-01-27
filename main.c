@@ -153,8 +153,6 @@ static void uart_irq_config()
 	hal_interrupt_unmask(UART0_INT); // enable UART0_INT
 }
 
-void uart_isr(void);
-
 interrupt_operation uart_opt = {
 	.dev_name = "uart",
 	.vector = UART0_INT,
@@ -189,9 +187,6 @@ int main(void)
 #ifdef RS485_TEST
 	rs485_init(10,11,12);	//G_MX[10]_TX --> DI, G_MX[11]_RX --> RO ,G_MX[12]_RTS
 #endif 
-
-	void test(void);
-	test(); // call Marlin test function
 
 	sp_interrupt_setup();
 	//timer_test();

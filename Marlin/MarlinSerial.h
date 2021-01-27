@@ -57,10 +57,7 @@
 #define M_USARTx_RX_vect SERIAL_REGNAME(USART,SERIAL_PORT,_RX_vect)
 #define M_U2Xx SERIAL_REGNAME(U2X,SERIAL_PORT,)
 #else
-#include <types.h>
-#include <common.h>
-#include <config.h>
-#include <emuio.h>
+#include <common_all.h>
 #endif
 
 #define DEC 10

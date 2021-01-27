@@ -322,8 +322,6 @@ int  _strncmp( const char *s1 , const char *s2 , int n)
 	return (*(unsigned char *) s1) - (*(unsigned char *) s2);
 }
 
-int uart_read(void);
-
 //stdlib
  int polling_io(void)
 {

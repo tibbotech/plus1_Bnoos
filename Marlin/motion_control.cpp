@@ -23,13 +23,6 @@
 #include "stepper.h"
 #include "planner.h"
 
-extern "C" void test(void);
-
-void test(void)
-{
-	MYSERIAL.println("test!\n");
-}
-
 // The arc is approximated by generating a huge number of tiny, linear segments. The length of each 
 // segment is configured in settings.mm_per_arc_segment.  
 void mc_arc(float *position, float *target, float *offset, uint8_t axis_0, uint8_t axis_1, 

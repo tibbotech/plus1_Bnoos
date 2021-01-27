@@ -1,6 +1,15 @@
 #ifndef _EMUIO_H_
 #define _EMUIO_H_
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN extern
+#endif
+
+EXTERN void uart_isr(void);
+EXTERN int uart_read(void); // return -1 means no data
+
 extern int psprintf(char *dest, const char *format, ...);
 extern void io_write_wait(const char *s);
 
