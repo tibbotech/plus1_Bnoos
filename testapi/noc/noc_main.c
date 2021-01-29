@@ -636,35 +636,11 @@ void read_noc_regs(char *module_name, char *reg_grp, char *reg_name)
 extern void noc_perf_log(void);
 extern void noc_perf_fs(void);
 
-interrupt_operition t3_opt;
-interrupt_operition fs_opt;
-
-interrupt_operition cbdma0_opt;
-interrupt_operition cbdma1_opt;
-
-
 #define TIMER3_TICKS	(63000-1)		/* 700ms */
 #define TIMER3_CONFIG_STC (1<<2)	/*src: stc*/
 #define TIMER3_RELOAD	(1<<1)		/*timer3 auto reload*/
 #define TIMER3_RUN 		(1<<0)		/*timer3 run*/
 #define TIMER3_STOP     (0<<0)		/*timer3 stop*/
-
-void timer3_isr_cfg()
-{
-	printf("[CFG] Timer3\n");
-	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD | TIMER3_RUN;
-	STC_REG->timer3_pres_val = 0;
-	STC_REG->timer3_reload = TIMER3_TICKS;
-	STC_REG->timer3_cnt = TIMER3_TICKS;
-	hal_interrupt_configure(154, 0, 1);
-}
-
-void field_start_isr_cfg()
-{
-	printf("[CFG] Field Start\n");
-	// hal_interrupt_configure(0, 0, 1);
-}
-
 
 void noc_initial_settings()
 {
@@ -677,23 +653,16 @@ void noc_initial_settings()
 	*reg_clk_en |= (1 << 6);
 	*reg_gclk_en |= (1 << 6);
 
-	memcpy(cbdma0_opt.dev_name, "CBDMA0", strlen("CBDMA0"));
-	cbdma0_opt.vector = 128;
-	cbdma0_opt.device_config = cbdma0_isr_cfg;
-	cbdma0_opt.interrupt_handler = cbdma0_isr;
-	interrupt_register(&cbdma0_opt);
+	interrupt_register(128, "CBDMA0", cbdma0_isr, 0);
 
-	// memcpy(t3_opt.dev_name, "Timer3", strlen("Timer3"));
-	// t3_opt.vector = 154;
-	// t3_opt.device_config = timer3_isr_cfg;
-	// t3_opt.interrupt_handler = noc_perf_log;
-	// interrupt_register(&t3_opt);
-
-	// memcpy(fs_opt.dev_name, "FStart", strlen("FStart"));
-	// fs_opt.vector = 0;
-	// fs_opt.device_config = field_start_isr_cfg;
-	// fs_opt.interrupt_handler = noc_perf_fs;
-	// interrupt_register(&fs_opt);
+#if 0
+	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD | TIMER3_RUN;
+	STC_REG->timer3_pres_val = 0;
+	STC_REG->timer3_reload = TIMER3_TICKS;
+	STC_REG->timer3_cnt = TIMER3_TICKS;
+	interrupt_register(154, "Timer3", noc_perf_log, 0);
+	interrupt_register(0, "FStart", noc_perf_fs, 0);
+#endif
 
 	// for (i = 0; i < DISP_DDFCH_ADDR_INDEX_MAX; i++) {
 	// 	printf("disp_ddfch base addr: 0x%llx\n", noc_disp_ddfch_amba_addr_regs->amba_addr[i].adbase);

@@ -27,34 +27,13 @@
 
 extern const unsigned char longlonglong_table[];
 
-void timer_intr_onoff(int onoff)
-{
-	if (onoff == ENABLE) {
-		/* enable timer0 interrupt */
-		hal_interrupt_unmask(154);
-	} else {
-		hal_interrupt_mask(154);
-	}
-}
-
-
-void fs_intr_onoff(int onoff)
-{
-	if (onoff == ENABLE) {
-		hal_interrupt_unmask(0);
-	} else {
-		hal_interrupt_mask(0);
-	}
-}
-
-
-void noc_perf_fs(void)
+void noc_perf_fs(int vector)
 {
 	printf("@\n");
 	return;
 }
 
-void noc_perf_log(void)
+void noc_perf_log(int vector)
 {
 	printf("@timer\n");
 	return;
@@ -76,11 +55,8 @@ void noc_perf(int onoff)
 		noc_sdctrl_sd0_amba_ctrl_regs->ccmdmsk = 0x01000000;
 		noc_sdctrl_sd0_amba_ctrl_regs->cntr = 0;
 
-		// timer_intr_onoff(ENABLE);
 		printf("Start ...\n");
 	} else {
-		fs_intr_onoff(DISABLE);
-		timer_intr_onoff(DISABLE);
 		noc_disp_ddfch_amba_ctrl_regs->cmd_cap[0].ccmdmsk = 0x0;
 	}
 
@@ -116,8 +92,6 @@ void noc_cbdma_test(int case_number)
 	STC_REG->timer3_pres_val = 0;
 	STC_REG->timer3_reload = 63000 - 1;
 	STC_REG->timer3_cnt = 63000 - 1;
-
-	cbdma0_intr_onoff(ENABLE);
 
 	is_cbdma0_done = FALSE;
 	// case 0

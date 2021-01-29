@@ -21,26 +21,7 @@
 #include "hal_axi_monitor_sub_reg.h"
 
 
-void axi_mon_interrupt_control_mask(int enable)
-{
-	if (enable != 0) {
-		/* enable axi mon interrupt */
-		hal_interrupt_unmask(103);
-	} else {
-		hal_interrupt_mask(103);
-	}
-}
-
-
-void axi_mon_isr_cfg()
-{
-	printf("[CFG] AXI MONITOR\n");
-	// axi_monitor_regs
-	hal_interrupt_configure(103, 0, 1);
-}
-
-
-void axi_mon_callback(void)
+void axi_mon_callback(int vector)
 {
 	reg_axi_monitor_t *axi = axi_monitor_regs;
 	reg_axi_monitor_sub_t *axi_sub;
@@ -108,13 +89,7 @@ void axi_mon_callback(void)
 
 void axi_mon_test_init()
 {
-	static interrupt_operation axi_mon_opt;
-
-	memcpy(axi_mon_opt.dev_name, "AXI_MON", strlen("AXI_MON"));
-	axi_mon_opt.vector = 103;
-	axi_mon_opt.device_config = axi_mon_isr_cfg;
-	axi_mon_opt.interrupt_handler = axi_mon_callback;
-	interrupt_register(&axi_mon_opt);
+	interrupt_register(103, "AXI_MON", axi_mon_callback, 0);
 }
 
 void axi_mon_unexcept_access_test()
@@ -136,8 +111,6 @@ void axi_mon_unexcept_access_test()
 
 	axi_sub->ip_monitor_control.bits.monitor_ue_access = 1;
 	axi_sub->ip_monitor_control.bits.monitor_enable = 1;
-
-	axi_mon_interrupt_control_mask(1);
 }
 
 
@@ -165,7 +138,6 @@ void axi_mon_timeout_test(unsigned int timeout_cnt)
 	axi_cbdma0->ip_monitor_control.bits.monitor_enable = 1;
 
 	axi_dram->ip_monitor_control.bits.monitor_enable = 1;
-	axi_mon_interrupt_control_mask(1);
 
 	cbdma_test();
 	printf("\tread_bw_ratio  : %d\n", axi_cbdma0->bw_info_record.bits.read_bw_ratio);
