@@ -92,6 +92,7 @@ int analogRead(uint8_t pin)
 // to digital output.
 void analogWrite(uint8_t pin, int val)
 {
+#if 0
 	// We need to make sure the PWM output is enabled for those pins
 	// that support it, as we turn it off when digitally reading or
 	// writing with them.  Also, make sure the pin is in output mode
@@ -256,4 +257,5 @@ void analogWrite(uint8_t pin, int val)
 				}
 		}
 	}
+#endif
 }

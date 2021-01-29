@@ -1,8 +1,8 @@
 #include <WProgram.h>
 
-int main(void)
+int Marlin_main(void)
 {
-	init();
+	//init();
 
 	setup();
     

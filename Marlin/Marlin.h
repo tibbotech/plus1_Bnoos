@@ -275,3 +275,4 @@ extern void digipot_i2c_init();
 
 extern void calculate_volumetric_multipliers();
 
+#define square(x) ((x)*(x))

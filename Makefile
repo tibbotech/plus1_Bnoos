@@ -66,7 +66,7 @@ CSOURCES += $(TESTAPI)/interrupt/sp_interrupt.c
 ASOURCES += $(TESTAPI)/interrupt/vectors.S
 
 # ardunio C source
-CSOURCES += Marlin/arduino/wiring_digital.c Marlin/arduino/wiring.c
+CSOURCES += Marlin/arduino/wiring_analog.c Marlin/arduino/wiring_digital.c Marlin/arduino/wiring.c
 
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
@@ -74,6 +74,7 @@ CFLAGS += -IMarlin/include -IMarlin/arduino
 CFLAGS += -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
 CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp Marlin/stepper.cpp Marlin/planner.cpp 
 CXXSOURCES += Marlin/temperature_ads1015.cpp Marlin/temperature.cpp
+CXXSOURCES += Marlin/ConfigurationStore.cpp Marlin/Marlin_main.cpp Marlin/arduino/main.cpp
 
 
 #I2C_TEST = ENABLE

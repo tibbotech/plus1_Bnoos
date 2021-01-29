@@ -4,6 +4,7 @@
 #include "ultralcd.h"
 #include "ConfigurationStore.h"
 
+#ifdef EEPROM_SETTINGS
 void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size)
 {
     do
@@ -40,7 +41,6 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 
 #define EEPROM_VERSION "V13"
 
-#ifdef EEPROM_SETTINGS
 void Config_StoreSettings() 
 {
   char ver[4]= "000";
