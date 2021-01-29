@@ -37,31 +37,35 @@ u32 STC_Get32(void)
 	return (STC_REG->stcl_1 << 16) | STC_REG->stcl_0;
 }
 
-/* STC 90kHz : 1 tick = 11.11 us */
+/* STC 900kHz : 1 tick = 1.11 us */
 inline void STC_delay_ticks(u32 ticks)
 {
 	/* Detect impossible 1s delay */
+	u32 counter = 0;
+
+	STC_REG->stc_31_16 = 0;
 	STC_REG->stc_15_0 = 0;
-	while (STC_REG->stc_15_0 < ticks);
+	
+	while (((STC_REG->stc_31_16<<16)|STC_REG->stc_15_0) < ticks);
 }
 
-/* STC 90kHz : max delay = 728 ms */
+/* STC 900kHz : max delay = 728 ms */
 void STC_delay_1ms(u32 msec)
 {
-	STC_delay_ticks(msec * 90);
+	STC_delay_ticks(msec * 900);
 }
 
 /* STC 90kHz : min = 11.11us, max = 728 ms */
 void STC_delay_us(u32 usec)
 {
-	u32 ticks = usec / 11;
-	STC_delay_ticks(ticks);
+	//u32 ticks = usec / 11;
+	STC_delay_ticks(usec);
 }
 
 u32 STC_get_timer(u32 base)
 {
 	u32 now = AV1_GetStc32();
-	return (now - base)/90;
+	return (now - base)/900;
 }
 
 

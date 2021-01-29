@@ -36,8 +36,11 @@
 #define _UTIL_DELAY_H_ 1
 
 #include <inttypes.h>
+#ifdef CPU_32_BIT 
+#include "stc.h"
+#else
 #include <util/delay_basic.h>
-
+#endif
 /** \file */
 /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
     \code
@@ -90,6 +93,21 @@ static inline void _delay_ms(double __ms) __attribute__((always_inline));
 # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
 #endif
 
+
+#ifdef CPU_32_BIT 
+void _delay_us(double __us)
+{
+	STC_delay_us((u32)__us);
+}
+
+void _delay_ms(double __ms)
+{
+	STC_delay_1ms((u32)__ms);
+}
+
+
+#else
+
 /**
    \ingroup util_delay
 
@@ -104,6 +122,8 @@ static inline void _delay_ms(double __ms) __attribute__((always_inline));
    _delay_us() will automatically call _delay_ms() instead.  The user
    will not be informed about this case.
  */
+
+
 void
 _delay_us(double __us)
 {
@@ -161,5 +181,5 @@ _delay_ms(double __ms)
 		__ticks = (uint16_t)__tmp;
 	_delay_loop_2(__ticks);
 }
-
+#endif
 #endif /* _UTIL_DELAY_H_ */
