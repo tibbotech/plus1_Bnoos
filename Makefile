@@ -125,6 +125,7 @@ endif
 #CFLAGS += -DIPC_TEST
 
 OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o)
+DEPS = $(OBJS:.o=.d)
 
 
 .PHONY: clean all
@@ -174,7 +175,7 @@ up:
 
 
 clean:
-	$P -rm -f $(OBJS) $(OBJS:.o=.d) rom.d >/dev/null
+	$P -rm -f $(OBJS) $(DEPS) rom.d >/dev/null
 	$P -cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
 	$P -rm -f $(LD_FILE) >/dev/null
 
@@ -183,4 +184,4 @@ p-%:
 	$(Pecho) "$* is '$($*)'"
 
 # Automaticaly include the dependency files created by gcc
--include ${shell find -name "*.d"}
+-include $(DEPS)
