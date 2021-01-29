@@ -19,7 +19,7 @@
 #include "cache.h"
 #include "sp_interrupt.h"
 
-#define TIMER3_TICKS		(90 - 1)		/* 1s */
+#define TIMER3_TICKS		(900 - 1)		/* 1s */
 #define TIMER3_CONFIG_STC	(1 << 2)	/* src: stc */
 #define TIMER3_RELOAD		(1 << 1)	/* timer3 auto reload */
 #define TIMER3_RUN 			(1 << 0)	/* timer3 run */
