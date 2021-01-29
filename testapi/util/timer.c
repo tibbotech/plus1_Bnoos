@@ -20,12 +20,17 @@
 #include "sp_interrupt.h"
 
 #define TIMER3_TICKS		(900 - 1)		/* 1s */
-#define TIMER3_CONFIG_STC	(1 << 2)	/* src: stc */
-#define TIMER3_RELOAD		(1 << 1)	/* timer3 auto reload */
-#define TIMER3_RUN 			(1 << 0)	/* timer3 run */
-#define TIMER3_STOP			(0 << 0)	/* timer3 stop */
+#define TIMER2_TICKS		(90 - 1)		/* 1s */
+
+#define TIMER_CONFIG_STC	(1 << 2)	/* src: stc */
+#define TIMER_RELOAD		(1 << 1)	/* timer auto reload */
+#define TIMER_RUN 			(1 << 0)	/* timer run */
+#define TIMER_STOP			(0 << 0)	/* timer stop */
+
+#define TIMER_1MS_PRES_VALUE	(9)		// 1ms=1.1us*(TIMER_1MS_PRES_VALUE+1)*(TIMER2_TICKS+1)
 
 #define TIMER3_INT  (154)
+#define TIMER2_INT  (153)
 
 static volatile unsigned int g_repeat_cnt = 0;
 
@@ -43,7 +48,7 @@ void timer_test_init()
 #else
 	isr_t isr = timer3_callback;
 #endif
-	STC_REG->timer3_ctl = TIMER3_CONFIG_STC | TIMER3_RELOAD;
+	STC_REG->timer3_ctl = TIMER_CONFIG_STC | TIMER_RELOAD;
 	STC_REG->timer3_pres_val = 999;
 	STC_REG->timer3_reload = TIMER3_TICKS;
 	STC_REG->timer3_cnt = TIMER3_TICKS;
@@ -56,12 +61,30 @@ void timer_test()
 
 	g_repeat_cnt = 0;
 
-	STC_REG->timer3_ctl |= TIMER3_RUN;
+	STC_REG->timer3_ctl |= TIMER_RUN;
 
 	while (g_repeat_cnt < 6);
 
-	STC_REG->timer3_ctl &= ~TIMER3_RUN;
+	STC_REG->timer3_ctl &= ~TIMER_RUN;
 
 	printf("Timer3 interrupt test finished\n");
 
 }
+
+
+void SP_start_timer2(void (*timer_callback)(int))
+{
+	isr_t isr = timer_callback;
+
+	STC_REG->timer2_ctl = TIMER_CONFIG_STC | TIMER_RELOAD;
+	STC_REG->timer2_pres_val = TIMER_1MS_PRES_VALUE;  
+	STC_REG->timer2_reload = TIMER2_TICKS;
+	STC_REG->timer2_cnt = TIMER2_TICKS;
+	
+	interrupt_register(TIMER2_INT, "TIMER2", isr, 0);
+
+	STC_REG->timer2_ctl |= TIMER_RUN;
+}
+
+
+

@@ -18,7 +18,8 @@
 #include <avr/interrupt.h>
 
 
-#include "fastio.h"
+//#include "fastio.h"
+#include "gpio_drv.h"
 #include "Configuration.h"
 #include "pins.h"
 

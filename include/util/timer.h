@@ -19,11 +19,19 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-
-void timer3_interrupt_control_mask(int enable);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // for test
 void timer_test_init();
 void timer_test();
+
+void SP_start_timer2(void (*)(int));
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __TIMER_H__

@@ -3,6 +3,9 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 //#define TIMER_KHZ           90
 #define TIMER_KHZ           900  //近似1000KHz
 
@@ -20,5 +23,8 @@ u32 STC_get_timer(u32 base);
 void AV1_STC_init(void);
 u32 AV1_GetStc32(void);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

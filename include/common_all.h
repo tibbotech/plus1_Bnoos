@@ -5,6 +5,7 @@
 #include "types.h"
 #include "common.h"
 #include "regmap.h"
+#include "stc.h"
 
 #include "emuio.h"
 #include "cbdma.h"

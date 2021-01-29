@@ -36,7 +36,11 @@
 
 #include "Sd2PinMap.h"
 
-
+#ifndef USE_ARDUINO 
+#include "temperature_ads1015.h"
+#include "gpio_drv.h"
+#include "timer.h"
+#endif
 //===========================================================================
 //=============================public variables============================
 //===========================================================================
@@ -760,10 +764,13 @@ static void updateTemperaturesFromRawValues()
     #endif  
     //Reset the watchdog after we know we have a temperature measurement.
     watchdog_reset();
-
+	#ifdef USE_ARDUINO
     CRITICAL_SECTION_START;
     temp_meas_ready = false;
     CRITICAL_SECTION_END;
+	#else 
+	   temp_meas_ready = false;
+	#endif
 }
 
 
@@ -860,34 +867,36 @@ void tp_init()
 	digitalWrite(MAX6675_SS,1);
   #endif
 
+#ifdef USE_ARDUINO
   // Set analog inputs
   ADCSRA = 1<<ADEN | 1<<ADSC | 1<<ADIF | 0x07;
   DIDR0 = 0;
+#endif
   #ifdef DIDR2
     DIDR2 = 0;
   #endif
-  #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
+  #if defined(USE_ARDUINO) && defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
     #if TEMP_0_PIN < 8
        DIDR0 |= 1 << TEMP_0_PIN; 
     #else
        DIDR2 |= 1<<(TEMP_0_PIN - 8); 
     #endif
   #endif
-  #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
+  #if defined(USE_ARDUINO) && defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
     #if TEMP_1_PIN < 8
        DIDR0 |= 1<<TEMP_1_PIN; 
     #else
        DIDR2 |= 1<<(TEMP_1_PIN - 8); 
     #endif
   #endif
-  #if defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
+  #if defined(USE_ARDUINO) && defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
     #if TEMP_2_PIN < 8
        DIDR0 |= 1 << TEMP_2_PIN; 
     #else
        DIDR2 |= 1<<(TEMP_2_PIN - 8); 
     #endif
   #endif
-  #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+  #if defined(USE_ARDUINO) && defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
     #if TEMP_BED_PIN < 8
        DIDR0 |= 1<<TEMP_BED_PIN; 
     #else
@@ -908,10 +917,16 @@ void tp_init()
   
   // Use timer0 for temperature measurement
   // Interleave temperature interrupt with millies interrupt
+ #ifdef USE_ARDUINO   // thq 
   OCR0B = 128;
   TIMSK0 |= (1<<OCIE0B);  
   
   // Wait for temperature measurement to settle
+ #else
+  ADS1015_Init();  //ADC init 
+  void Marlin_temperature_callback(int vector);
+  SP_start_timer2(Marlin_temperature_callback); //start 1ms timer
+ #endif 
   delay(250);
 
 #ifdef HEATER_0_MINTEMP
@@ -1210,7 +1225,11 @@ int read_max6675()
 
 
 // Timer 0 is shared with millies
+#ifdef USE_ARDUINO   // thq 
 ISR(TIMER0_COMPB_vect)
+#else
+void Marlin_temperature_callback(int vector)
+#endif
 {
   //these variables are only accesible from the ISR, but static, so they don't lose their value
   static unsigned char temp_count = 0;
@@ -1528,7 +1547,7 @@ ISR(TIMER0_COMPB_vect)
   
   switch(temp_state) {
     case 0: // Prepare TEMP_0
-      #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
+      #if defined(USE_ARDUINO) &&defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)	 
         #if TEMP_0_PIN > 7
           ADCSRB = 1<<MUX5;
         #else
@@ -1542,7 +1561,11 @@ ISR(TIMER0_COMPB_vect)
       break;
     case 1: // Measure TEMP_0
       #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
+	 	 #ifdef USE_ARDUINO
         raw_temp_0_value += ADC;
+		 #else
+			raw_temp_0_value = ADS1015_Read(0);
+		 #endif
       #endif
       #ifdef HEATER_0_USES_MAX6675 // TODO remove the blocking
         raw_temp_0_value = read_max6675();
@@ -1550,7 +1573,7 @@ ISR(TIMER0_COMPB_vect)
       temp_state = 2;
       break;
     case 2: // Prepare TEMP_BED
-      #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+      #if defined(USE_ARDUINO) && defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
         #if TEMP_BED_PIN > 7
           ADCSRB = 1<<MUX5;
         #else
@@ -1564,12 +1587,16 @@ ISR(TIMER0_COMPB_vect)
       break;
     case 3: // Measure TEMP_BED
       #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+	  	 #ifdef USE_ARDUINO
         raw_temp_bed_value += ADC;
+		 #else
+		  	raw_temp_bed_value = ADS1015_Read(1);
+		 #endif
       #endif
       temp_state = 4;
       break;
     case 4: // Prepare TEMP_1
-      #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
+      #if defined(USE_ARDUINO) && defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
         #if TEMP_1_PIN > 7
           ADCSRB = 1<<MUX5;
         #else
@@ -1582,13 +1609,13 @@ ISR(TIMER0_COMPB_vect)
       temp_state = 5;
       break;
     case 5: // Measure TEMP_1
-      #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
+      #if defined(USE_ARDUINO) && defined(TEMP_1_PIN) && (TEMP_1_PIN > -1)
         raw_temp_1_value += ADC;
       #endif
       temp_state = 6;
       break;
     case 6: // Prepare TEMP_2
-      #if defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
+      #if defined(USE_ARDUINO) && defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
         #if TEMP_2_PIN > 7
           ADCSRB = 1<<MUX5;
         #else
@@ -1601,14 +1628,14 @@ ISR(TIMER0_COMPB_vect)
       temp_state = 7;
       break;
     case 7: // Measure TEMP_2
-      #if defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
+      #if defined(USE_ARDUINO) && defined(TEMP_2_PIN) && (TEMP_2_PIN > -1)
         raw_temp_2_value += ADC;
       #endif
       temp_state = 8;//change so that Filament Width is also measured
       
       break;
     case 8: //Prepare FILWIDTH 
-     #if defined(FILWIDTH_PIN) && (FILWIDTH_PIN> -1) 
+     #if defined(USE_ARDUINO) && defined(FILWIDTH_PIN) && (FILWIDTH_PIN> -1) 
       #if FILWIDTH_PIN>7 
          ADCSRB = 1<<MUX5;
       #else
@@ -1621,7 +1648,7 @@ ISR(TIMER0_COMPB_vect)
      temp_state = 9; 
      break; 
     case 9:   //Measure FILWIDTH 
-     #if defined(FILWIDTH_PIN) &&(FILWIDTH_PIN > -1) 
+     #if defined(USE_ARDUINO) && defined(FILWIDTH_PIN) &&(FILWIDTH_PIN > -1) 
      //raw_filwidth_value += ADC;  //remove to use an IIR filter approach 
       if(ADC>102)  //check that ADC is reading a voltage > 0.5 volts, otherwise don't take in the data.
         {

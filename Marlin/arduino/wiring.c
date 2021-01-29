@@ -22,6 +22,33 @@
   $Id$
 */
 
+#include "stc.h"
+
+unsigned long millis()
+{
+	return (unsigned long)(AV1_GetStc32()/900);
+}
+
+#define MAX_DELAY_MS	(60)  // max delay is 67ms at once
+void delay(unsigned long ms)
+{
+	if(ms > MAX_DELAY_MS)
+	{
+		int rep_cnt = ms/MAX_DELAY_MS;
+		int remain = ms%MAX_DELAY_MS;
+		while(rep_cnt--)
+			STC_delay_1ms(MAX_DELAY_MS);
+		if(remain)
+			STC_delay_1ms(remain);
+	}
+	else
+	{
+		STC_delay_1ms(ms);
+	}
+}
+
+
+#if 0
 #include "wiring_private.h"
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
@@ -287,3 +314,4 @@ void init()
 	UCSR0B = 0;
 #endif
 }
+#endif

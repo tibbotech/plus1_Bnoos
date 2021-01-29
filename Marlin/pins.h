@@ -2967,4 +2967,16 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
                         _E0_PINS _E1_PINS _E2_PINS             \
                         analogInputToDigitalPin(TEMP_0_PIN), analogInputToDigitalPin(TEMP_1_PIN), analogInputToDigitalPin(TEMP_2_PIN), analogInputToDigitalPin(TEMP_BED_PIN) }
 
+#if MB(RAMPS_13_EFB)
+#define KNOWN_BOARD 1
+#undef HEATER_0_PIN
+#define HEATER_0_PIN       38   //GPIOP4_6
+#undef HEATER_BED_PIN
+#define HEATER_BED_PIN     39	 //GPIOP4_7
+
+#define TEMP_I2C_SDA		18   //GPIOP2_2
+#define TEMP_I2C_SCL		19	 //GPIOP2_3
+#define TEMP_0_PIN         0xFF  //used the define not pin number
+#define TEMP_BED_PIN       0xFF	 //used the define not pin number
+#endif
 #endif //__PINS_H

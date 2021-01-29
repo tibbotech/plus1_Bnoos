@@ -1,8 +1,14 @@
 #ifndef _SP_GPIO_DRV_H_
 #define _SP_GPIO_DRV_H_
+
+
+
 #include <types.h>
 #include <common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum
 {
@@ -208,7 +214,6 @@ extern u32 gpio_pin_mux_get(PMXSEL_ID id);
                                 gpio_first_0(a); \
                             } \
                         } while(0)
-//@a:gpio number, @d 1:enable gpio function, 0:disable gpio function, the pin for other function mode                          
 #define GPIO_F_GET(a)	gpio_first_val_get(a)
 
 #define GPIO_M_SET(a,d) do { \
@@ -244,6 +249,26 @@ extern u32 gpio_pin_mux_get(PMXSEL_ID id);
 
 #define GPIO_PIN_MUX_SEL(a,d) gpio_pin_mux_sel(a,d)
 #define GPIO_PIN_MUX_GET(a) gpio_pin_mux_get(a)
+
+
+#define SET_OUTPUT(a)	GPIO_F_SET(a,1);\
+						GPIO_M_SET(a,1);\
+						GPIO_E_SET(a,1);\
+						GPIO_O_SET(a,0)
+
+#define SET_INPUT(a)	GPIO_F_SET(a,1);\
+						GPIO_M_SET(a,1);\
+						GPIO_E_SET(a,0)
+
+#define WRITE(a,d)		GPIO_O_SET(a,d)
+
+#define READ(a)			GPIO_I_GET(a)
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* _SP_GPIO_DRV_H_ */
 
