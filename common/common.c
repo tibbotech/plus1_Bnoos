@@ -42,11 +42,11 @@ int strlen(const char * str)
 #else
 extern char __bss_end__;
 char linebuf[300];
+void *__brkval = &__bss_end__;
 void * _sbrk(int incr)
 {
-	static void *heapP = &__bss_end__;
-	void *ret = heapP;
-	heapP += incr;
+	void *ret = __brkval;
+	__brkval += incr;
 	return ret;
 }
 

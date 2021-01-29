@@ -86,7 +86,7 @@
 #endif
 
 #ifndef __ATTR_PROGMEM__
-#define __ATTR_PROGMEM__ //__attribute__((__progmem__))
+//#define __ATTR_PROGMEM__ __attribute__((__progmem__))
 #endif
 
 #ifndef __ATTR_PURE__
@@ -100,7 +100,11 @@
    Attribute to use in order to declare an object being located in
    flash ROM.
  */
+#ifdef __ATTR_PROGMEM__
 #define PROGMEM __ATTR_PROGMEM__
+#else
+#define PROGMEM
+#endif
 
 #ifdef __cplusplus
 extern "C" {

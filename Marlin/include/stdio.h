@@ -668,11 +668,15 @@ extern int	vprintf(const char *__fmt, va_list __ap);
 */
 extern int	sprintf(char *__s, const char *__fmt, ...);
 
+#ifdef __ATTR_PROGMEM__
 /**
    Variant of \c sprintf() that uses a \c fmt string that resides
    in program memory.
 */
 extern int	sprintf_P(char *__s, const char *__fmt, ...);
+#else
+#define sprintf_P sprintf
+#endif
 
 /**
    Like \c sprintf(), but instead of assuming \c s to be of infinite
@@ -684,11 +688,15 @@ extern int	sprintf_P(char *__s, const char *__fmt, ...);
 */
 extern int	snprintf(char *__s, size_t __n, const char *__fmt, ...);
 
+#ifdef __ATTR_PROGMEM__
 /**
    Variant of \c snprintf() that uses a \c fmt string that resides
    in program memory.
 */
 extern int	snprintf_P(char *__s, size_t __n, const char *__fmt, ...);
+#else
+#define snprintf_P snprintf
+#endif
 
 /**
    Like \c sprintf() but takes a variable argument list for the
@@ -696,11 +704,15 @@ extern int	snprintf_P(char *__s, size_t __n, const char *__fmt, ...);
 */
 extern int	vsprintf(char *__s, const char *__fmt, va_list ap);
 
+#ifdef __ATTR_PROGMEM__
 /**
    Variant of \c vsprintf() that uses a \c fmt string that resides
    in program memory.
 */
 extern int	vsprintf_P(char *__s, const char *__fmt, va_list ap);
+#else
+#define vsprintf_P vsprintf
+#endif
 
 /**
    Like \c vsprintf(), but instead of assuming \c s to be of infinite
