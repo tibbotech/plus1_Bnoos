@@ -32,19 +32,7 @@ unsigned long millis()
 #define MAX_DELAY_MS	(60)  // max delay is 67ms at once
 void delay(unsigned long ms)
 {
-	if(ms > MAX_DELAY_MS)
-	{
-		int rep_cnt = ms/MAX_DELAY_MS;
-		int remain = ms%MAX_DELAY_MS;
-		while(rep_cnt--)
-			STC_delay_1ms(MAX_DELAY_MS);
-		if(remain)
-			STC_delay_1ms(remain);
-	}
-	else
-	{
-		STC_delay_1ms(ms);
-	}
+	STC_delay_1ms(ms);
 }
 
 

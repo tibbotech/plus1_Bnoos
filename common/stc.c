@@ -8,6 +8,11 @@
  */
 #define BOOT_TIME_STC  (STC_AV1_REG)
 
+#define STC_COUNTER	(((u64)STC_REG->stc_63_48<<48)| \
+					 ((u64)STC_REG->stc_47_32<<32)| \
+					 ((u64)STC_REG->stc_31_16<<16)| \
+					 ((u64)STC_REG->stc_15_0))
+
 static void STC_hw_init(volatile struct stc_regs *regs)
 {
 	regs->stc_config = 0;
@@ -41,12 +46,9 @@ u32 STC_Get32(void)
 inline void STC_delay_ticks(u32 ticks)
 {
 	/* Detect impossible 1s delay */
-	u32 counter = 0;
+	u64 counter = STC_COUNTER + ticks;
 
-	STC_REG->stc_31_16 = 0;
-	STC_REG->stc_15_0 = 0;
-	
-	while (((STC_REG->stc_31_16<<16)|STC_REG->stc_15_0) < ticks);
+	while (STC_COUNTER < counter);
 }
 
 /* STC 900kHz : max delay = 728 ms */

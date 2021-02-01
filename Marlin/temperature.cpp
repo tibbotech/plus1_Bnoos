@@ -931,7 +931,7 @@ void tp_init()
 	TRACE;
  #endif 
 	TRACE;
-  //delay(250);
+  delay(250);
 
 	TRACE;
 #ifdef HEATER_0_MINTEMP
