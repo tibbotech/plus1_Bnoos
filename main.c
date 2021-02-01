@@ -170,7 +170,7 @@ int main(void)
 	sp_interrupt_setup();
 
 	//timer_test_init();
-	cbdma_test_init();
+	//cbdma_test_init();
 	uart_isr_init();
 
 #ifdef RS485_TEST

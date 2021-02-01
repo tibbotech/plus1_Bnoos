@@ -554,7 +554,6 @@ void servo_init()
 
 void setup()
 {
-	TRACE;
   setup_killpin();
   setup_powerhold();
   MYSERIAL.begin(BAUDRATE);
@@ -596,9 +595,7 @@ void setup()
   // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
   Config_RetrieveSettings();
 
-	TRACE;
   tp_init();    // Initialize temperature loop
-	TRACE;
   plan_init();  // Initialize planner;
   watchdog_init();
   st_init();    // Initialize stepper, this enables interrupts!
