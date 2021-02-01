@@ -7,11 +7,14 @@
 #define EXTERN extern
 #endif
 
+#define TRACE printf(">>> %s: %s(%d)\n", __FILE__, __FUNCTION__, __LINE__)
+
+EXTERN int Marlin_main(void);
 EXTERN void uart_isr(int vector);
 EXTERN int uart_read(void); // return -1 means no data
 
-extern int psprintf(char *dest, const char *format, ...);
-extern void io_write_wait(const char *s);
+EXTERN int psprintf(char *dest, const char *format, ...);
+EXTERN void io_write_wait(const char *s);
 
 extern char linebuf[];
 

@@ -180,7 +180,8 @@ int main(void)
 	//timer_test();
 
 	printf("NonOS boot OK!!!\n");
-	task_dbg();
+	//task_dbg();
+	Marlin_main();
 	while(1);
 
 	//Never get here

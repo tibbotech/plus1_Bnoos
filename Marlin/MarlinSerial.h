@@ -104,6 +104,7 @@ class MarlinSerial //: public Stream
     
     FORCE_INLINE void write(uint8_t c)
     {
+		if (c == '\n') UART_putc('\r');
 		UART_putc(c);
     }
     

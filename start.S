@@ -6,13 +6,12 @@
 
 .global __sp_init
 
-.equ _ISR_STARTADDRESS, __sp_init
-.equ UserStack, _ISR_STARTADDRESS
-.equ SVCStack, UserStack-STACK_SIZE
-.equ UndefStack, SVCStack-STACK_SIZE
+.equ UserStack, __sp_init
+.equ UndefStack, UserStack-STACK_SIZE
 .equ AbortStack, UndefStack-STACK_SIZE
 .equ IRQStack, AbortStack-STACK_SIZE
 .equ FIQStack, IRQStack-STACK_SIZE
+.equ SVCStack, FIQStack-STACK_SIZE
 
 .equ USERMODE, 0x10
 .equ FIQMODE, 0x11

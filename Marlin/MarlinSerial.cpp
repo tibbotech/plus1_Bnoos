@@ -61,7 +61,7 @@ void uart_isr(int vector)
 {
 	unsigned char c = UART_getc();
 	store_char(c);
-	//UART_putc(c);
+	UART_putc(c);
 }
 
 int uart_read(void)

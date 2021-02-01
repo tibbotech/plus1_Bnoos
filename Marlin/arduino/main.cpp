@@ -1,4 +1,5 @@
 #include <WProgram.h>
+#include <emuio.h>
 
 int Marlin_main(void)
 {
