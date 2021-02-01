@@ -28,7 +28,7 @@ void timer_test_init();
 void timer_test();
 
 void SP_start_timer2(void (*)(int));
-
+void SP_start_timer3(void (*)(int));
 
 #ifdef __cplusplus
 }

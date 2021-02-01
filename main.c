@@ -169,7 +169,7 @@ int main(void)
 	int_memcpy(0x00000000, __vectors_start, (unsigned)__vectors_end - (unsigned)__vectors_start);
 	sp_interrupt_setup();
 
-	timer_test_init();
+	//timer_test_init();
 	cbdma_test_init();
 	uart_isr_init();
 
