@@ -13,10 +13,13 @@ EXTERN int Marlin_main(void);
 EXTERN void uart_isr(int vector);
 EXTERN int uart_read(void); // return -1 means no data
 
-EXTERN int psprintf(char *dest, const char *format, ...);
-EXTERN void io_write_wait(const char *s);
-
+//#define USE_PSPRINTF // using psprintf@sio.c replace printf
+#ifdef USE_PSPRINTF
 extern char linebuf[];
+EXTERN int psprintf(char *dest, const char *format, ...);
+#define printf(s...) \
+	do { psprintf(linebuf, ## s); UART_puts(linebuf); } while (0)
+#endif
 
 #define dbg_info()	_dbg_info(__FILE__, __LINE__)
 #define dbg()		_dbg_info(__FILE__, __LINE__)
@@ -38,7 +41,7 @@ extern char linebuf[];
 #define UART_wait()         do { while (!UART_tx_rdy()) ;} while (0)
 #define UART_flush()        do { while (!UART_tx_empty()) ;} while (0)
 #define UART_putc(c)        do { UART_wait(); UART_putc_nw(c); } while (0)
-#define UART_putc_nl(c)     do { UART_putc(c); if (c == 0x0a) UART_putc(0x0d);} while (0)
+#define UART_putc_nl(c)     do { char _c=(c); UART_putc(_c); if (_c == 0x0a) UART_putc(0x0d);} while (0)
 #define UART_puts(s) \
 do { \
 	int __c; \
@@ -47,10 +50,5 @@ do { \
 		UART_putc_nl(__c); \
 	} \
 } while (0)
-
-#define printf(s...) \
-	do { psprintf(linebuf, ## s); UART_puts(linebuf); } while (0)
-
-
 
 #endif /* _EMUIO_H_ */

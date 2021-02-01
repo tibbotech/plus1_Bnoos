@@ -1,7 +1,5 @@
-#include <common.h>
-#include <types.h>
+#include <common_all.h>
 #include <regmap.h>
-#include <config.h>
 #include <stc.h>
 /*
  * STC_AV1 if for boot time measurement
