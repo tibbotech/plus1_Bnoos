@@ -677,6 +677,7 @@ void get_command()
        (serial_char == ':' && comment_mode == false) ||
        serial_count >= (MAX_CMD_SIZE - 1) )
     {
+	  MYSERIAL.write('\n');
       if(!serial_count) { //if empty line
         comment_mode = false; //for new command
         return;
