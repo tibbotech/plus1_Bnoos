@@ -770,6 +770,10 @@ void get_command()
     }
     else
     {
+	  if(serial_char == '\b'){ // backspace
+		serial_count--;
+		continue;
+	  }
       if(serial_char == ';') comment_mode = true;
       if(!comment_mode) cmdbuffer[bufindw][serial_count++] = serial_char;
     }
