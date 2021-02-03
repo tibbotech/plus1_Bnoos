@@ -91,7 +91,7 @@ void SP_start_timer3(void (*timer_callback)(int))
     isr_t isr = timer_callback;
 
     STC_REG->timer3_ctl = TIMER_CONFIG_STC | TIMER_RELOAD;
-    STC_REG->timer3_pres_val = TIMER_1MS_PRES_VALUE;
+    STC_REG->timer3_pres_val = TIMER_1MS_PRES_VALUE*74;
     STC_REG->timer3_reload = TIMER3_TICKS;
     STC_REG->timer3_cnt = TIMER3_TICKS;
 

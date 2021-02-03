@@ -26,9 +26,10 @@
 // build by the user have been successfully uploaded into firmware.
 
 //#define STRING_VERSION "1.0.2"
+#define BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
 
 #define STRING_VERSION_CONFIG_H __DATE__ " " __TIME__ // build date and time
-#define STRING_CONFIG_H_AUTHOR "(SunQiuJun, Rainbow I3)" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "(Sunplus, Rainbow I3)" // Who made the changes.
 
 // SERIAL_PORT selects which serial port should be used for communication with the host.
 // This allows the connection of wireless adapters (for instance) to non-default port pins.

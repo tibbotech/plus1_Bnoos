@@ -1163,9 +1163,9 @@ void bed_max_temp_error(void) {
   WRITE(HEATER_BED_PIN, 0);
 #endif
   if(IsStopped() == false) {
-    SERIAL_ERROR_START;
-    SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
-    LCD_ALERTMESSAGEPGM("Err: MAXTEMP BED");
+    //SERIAL_ERROR_START;
+    //SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
+    //LCD_ALERTMESSAGEPGM("Err: MAXTEMP BED");
   }
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
   Stop();

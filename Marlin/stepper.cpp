@@ -278,7 +278,10 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {  //get timer 
   else {
     step_loops = 1;
   }
-
+#if 1
+  #define STEPPER_TIMER_RATE 2000000 // 2 Mhz
+  timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
+#else
   if(step_rate < (F_CPU/500000)) step_rate = (F_CPU/500000);			//16MHz/500kHz  ???
   step_rate -= (F_CPU/500000); // Correct for minimal speed
   if(step_rate >= (8*256)){ // higher step rate
@@ -313,6 +316,7 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {  //get timer 
   #endif
   }
   if(timer < 100) { timer = 100; MYSERIAL.print(MSG_STEPPER_TOO_HIGH); MYSERIAL.println(step_rate); }//(20kHz this should never happen)
+#endif
   timer = (timer * 9)/2000; //原OCR=2000,为1ms
   return timer;
 }
@@ -366,7 +370,6 @@ void Marlin_stepper_callback(int vector)
       counter_z = counter_x;
       counter_e = counter_x;
       step_events_completed = 0;
-
       #ifdef Z_LATE_ENABLE
         if(current_block->steps_z > 0) {
           enable_z();
@@ -394,8 +397,7 @@ void Marlin_stepper_callback(int vector)
 
   if (current_block != NULL) {
     // Set directions TO DO This should be done once during init of trapezoid. Endstops -> interrupt
-    out_bits = current_block->direction_bits;
-
+    out_bits = current_block->direction_bits; //这个block的方向位，“1”反向，“0”正向，每一个位代表一个轴的方向
 
     // Set the direction bits (X_AXIS=A_AXIS and Y_AXIS=B_AXIS for COREXY)
     if((out_bits & (1<<X_AXIS))!=0){
@@ -563,10 +565,9 @@ void Marlin_stepper_callback(int vector)
     // Calculare new timer value
     unsigned short timer;
     unsigned short step_rate;
-    if (step_events_completed <= (unsigned long int)current_block->accelerate_until) { //处于加速阶段
-
-      MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate);
-      acc_step_rate += current_block->initial_rate;	 //赋值起始速率
+    if (step_events_completed <= (unsigned long int)current_block->accelerate_until) { //until梯形曲线中的加速距离
+      MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate); //v=a*t
+      acc_step_rate += current_block->initial_rate;	 //vt=a*t+v0
 
       // upper limit
       if(acc_step_rate > current_block->nominal_rate) //超过额定速率的处理
@@ -581,7 +582,7 @@ void Marlin_stepper_callback(int vector)
     #endif
       acceleration_time += timer;
     }
-    else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
+    else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {//after梯形曲线中的匀速和加速距离
       MultiU24X24toH16(step_rate, deceleration_time, current_block->acceleration_rate);
 
       if(step_rate > acc_step_rate) { // Check step_rate stays positive
@@ -634,14 +635,14 @@ void st_init()
 
   #if defined(Y_DIR_PIN) && Y_DIR_PIN > -1
     SET_OUTPUT(Y_DIR_PIN);
-		
   #endif
+
   #if defined(Z_DIR_PIN) && Z_DIR_PIN > -1
     SET_OUTPUT(Z_DIR_PIN);
+  #endif
 
-    #if defined(Z_DUAL_STEPPER_DRIVERS) && defined(Z2_DIR_PIN) && (Z2_DIR_PIN > -1)
-      SET_OUTPUT(Z2_DIR_PIN);
-    #endif
+  #if defined(E0_DIR_PIN) && E0_DIR_PIN > -1
+    SET_OUTPUT(E0_DIR_PIN);
   #endif
 
   //Initialize Enable Pins - steppers default to disabled.
@@ -654,16 +655,16 @@ void st_init()
   #if defined(Y_ENABLE_PIN) && Y_ENABLE_PIN > -1
     SET_OUTPUT(Y_ENABLE_PIN);
     if(!Y_ENABLE_ON) WRITE(Y_ENABLE_PIN,HIGH);
-
   #endif
+
   #if defined(Z_ENABLE_PIN) && Z_ENABLE_PIN > -1
     SET_OUTPUT(Z_ENABLE_PIN);
     if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
+  #endif
 
-    #if defined(Z_DUAL_STEPPER_DRIVERS) && defined(Z2_ENABLE_PIN) && (Z2_ENABLE_PIN > -1)
-      SET_OUTPUT(Z2_ENABLE_PIN);
-      if(!Z_ENABLE_ON) WRITE(Z2_ENABLE_PIN,HIGH);
-    #endif
+  #if defined(E0_ENABLE_PIN) && (E0_ENABLE_PIN > -1)
+    SET_OUTPUT(E0_ENABLE_PIN);
+    if(!E_ENABLE_ON) WRITE(E0_ENABLE_PIN,HIGH);
   #endif
 
   //endstops and pullups
@@ -717,7 +718,6 @@ void st_init()
     WRITE(X_STEP_PIN,INVERT_X_STEP_PIN);
     disable_x();
   #endif
-
   #if defined(Y_STEP_PIN) && (Y_STEP_PIN > -1)
     SET_OUTPUT(Y_STEP_PIN);
     WRITE(Y_STEP_PIN,INVERT_Y_STEP_PIN);
@@ -726,13 +726,13 @@ void st_init()
   #if defined(Z_STEP_PIN) && (Z_STEP_PIN > -1)
     SET_OUTPUT(Z_STEP_PIN);
     WRITE(Z_STEP_PIN,INVERT_Z_STEP_PIN);
-    #if defined(Z_DUAL_STEPPER_DRIVERS) && defined(Z2_STEP_PIN) && (Z2_STEP_PIN > -1)
-      SET_OUTPUT(Z2_STEP_PIN);
-      WRITE(Z2_STEP_PIN,INVERT_Z_STEP_PIN);
-    #endif
     disable_z();
   #endif
-
+  #if defined(E0_STEP_PIN) && (E0_STEP_PIN > -1)
+    SET_OUTPUT(E0_STEP_PIN);
+    WRITE(E0_STEP_PIN,INVERT_E_STEP_PIN);
+    disable_e0();
+  #endif
 #ifdef USE_ARDUINO
 /*
 CTC(Clear Timer on Compare Match)，在这个模式下，
@@ -759,7 +759,6 @@ timer1不在是溢出中断了，而是在寄存器中设定好的
   OCR1A = 0x4000;
   TCNT1 = 0;
 #else
-  void Marlin_stepper_callback(int vector);
   SP_start_timer3(Marlin_stepper_callback);
 #endif
   ENABLE_STEPPER_DRIVER_INTERRUPT();
@@ -844,42 +843,34 @@ void babystep(const uint8_t axis,const bool direction)
   {
   case X_AXIS:
   {
-    enable_x();   
+    enable_x();
     uint8_t old_x_dir_pin= READ(X_DIR_PIN);  //if dualzstepper, both point to same direction.
-   
     //setup new step
     WRITE(X_DIR_PIN,(INVERT_X_DIR)^direction);
-    
-    //perform step 
-    WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN); 
+    //perform step
+    WRITE(X_STEP_PIN, !INVERT_X_STEP_PIN);
     {
     float x=1./float(axis+1)/float(axis+2); //wait a tiny bit
     }
     WRITE(X_STEP_PIN, INVERT_X_STEP_PIN);
-
     //get old pin state back.
     WRITE(X_DIR_PIN,old_x_dir_pin);
-
   }
   break;
   case Y_AXIS:
   {
     enable_y();   
     uint8_t old_y_dir_pin= READ(Y_DIR_PIN);  //if dualzstepper, both point to same direction.
-   
     //setup new step
     WRITE(Y_DIR_PIN,(INVERT_Y_DIR)^direction);
-    
-    //perform step 
-    WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN); 
+    //perform step
+    WRITE(Y_STEP_PIN, !INVERT_Y_STEP_PIN);
     {
     float x=1./float(axis+1)/float(axis+2); //wait a tiny bit
     }
     WRITE(Y_STEP_PIN, INVERT_Y_STEP_PIN);
-
     //get old pin state back.
     WRITE(Y_DIR_PIN,old_y_dir_pin);
-
   }
   break;
  
@@ -888,31 +879,18 @@ void babystep(const uint8_t axis,const bool direction)
   {
     enable_z();
     uint8_t old_z_dir_pin= READ(Z_DIR_PIN);  //if dualzstepper, both point to same direction.
+
     //setup new step
     WRITE(Z_DIR_PIN,(INVERT_Z_DIR)^direction^BABYSTEP_INVERT_Z);
-    #ifdef Z_DUAL_STEPPER_DRIVERS
-      WRITE(Z2_DIR_PIN,(INVERT_Z_DIR)^direction^BABYSTEP_INVERT_Z);
-    #endif
     //perform step 
     WRITE(Z_STEP_PIN, !INVERT_Z_STEP_PIN); 
-    #ifdef Z_DUAL_STEPPER_DRIVERS
-      WRITE(Z2_STEP_PIN, !INVERT_Z_STEP_PIN);
-    #endif
     //wait a tiny bit
     {
     float x=1./float(axis+1); //absolutely useless
     }
     WRITE(Z_STEP_PIN, INVERT_Z_STEP_PIN);
-    #ifdef Z_DUAL_STEPPER_DRIVERS
-      WRITE(Z2_STEP_PIN, INVERT_Z_STEP_PIN);
-    #endif
-
     //get old pin state back.
     WRITE(Z_DIR_PIN,old_z_dir_pin);
-    #ifdef Z_DUAL_STEPPER_DRIVERS
-      WRITE(Z2_DIR_PIN,old_z_dir_pin);
-    #endif
-
   }
   break;
 #else //DELTA

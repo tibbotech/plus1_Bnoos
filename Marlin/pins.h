@@ -2968,15 +2968,57 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
                         analogInputToDigitalPin(TEMP_0_PIN), analogInputToDigitalPin(TEMP_1_PIN), analogInputToDigitalPin(TEMP_2_PIN), analogInputToDigitalPin(TEMP_BED_PIN) }
 
 #if MB(RAMPS_13_EFB)
+
+#undef  X_STEP_PIN
+#undef  X_DIR_PIN
+#undef  X_ENABLE_PIN
+#undef  X_MIN_PIN
+#undef  X_MIN_PIN
+#undef  Y_STEP_PIN
+#undef  Y_DIR_PIN
+#undef  Y_ENABLE_PIN
+#undef  Y_MIN_PIN
+#undef  Y_MAX_PIN
+#undef  Z_STEP_PIN
+#undef  Z_DIR_PIN
+#undef  Z_ENABLE_PIN
+#undef  Z_MIN_PIN
+#undef  Z_MAX_PIN
+#undef  E0_STEP_PIN
+#undef  E0_DIR_PIN
+#undef  E0_ENABLE_PIN
+
+#define X_STEP_PIN          8   //GPIOP1_0
+#define X_DIR_PIN           9   //GPIOP1_1
+#define X_ENABLE_PIN       10   //GPIOP1_2
+#define X_MIN_PIN          11   //GPIOP1_3
+#define X_MAX_PIN          12   //GPIOP1_4
+
+#define Y_STEP_PIN         13   //GPIOP1_5
+#define Y_DIR_PIN          14   //GPIOP1_6
+#define Y_ENABLE_PIN       15   //GPIOP1_74
+#define Y_MIN_PIN           0   //GPIOP0_0
+#define Y_MAX_PIN           1   //GPIOP0_1
+
+#define Z_STEP_PIN         56   //GPIOP7_0
+#define Z_DIR_PIN          57   //GPIOP7_1
+#define Z_ENABLE_PIN       58   //GPIOP7_2
+#define Z_MIN_PIN          59   //GPIOP7_3
+#define Z_MAX_PIN          60   //GPIOP7_4
+
+#define E0_STEP_PIN        61   //GPIOP7_5
+#define E0_DIR_PIN         62   //GPIOP7_6
+#define E0_ENABLE_PIN      63   //GPIOP7_7
+
 #define KNOWN_BOARD 1
 #undef HEATER_0_PIN
 #define HEATER_0_PIN       38   //GPIOP4_6
 #undef HEATER_BED_PIN
-#define HEATER_BED_PIN     39	 //GPIOP4_7
+#define HEATER_BED_PIN     39    //GPIOP4_7
 
-#define TEMP_I2C_SDA		18   //GPIOP2_2
-#define TEMP_I2C_SCL		19	 //GPIOP2_3
+#define TEMP_I2C_SDA        18   //GPIOP2_2
+#define TEMP_I2C_SCL        19   //GPIOP2_3
 #define TEMP_0_PIN         0xFF  //used the define not pin number
-#define TEMP_BED_PIN       0xFF	 //used the define not pin number
+#define TEMP_BED_PIN       0xFF  //used the define not pin number
 #endif
 #endif //__PINS_H
