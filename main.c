@@ -160,7 +160,6 @@ int main(void)
 #ifdef I2C_TEST
     unsigned int test;
 #endif
-
 	printf("Build @%s, %s\n", __DATE__, __TIME__);
 	hw_init();
 	AV1_STC_init();
@@ -170,7 +169,7 @@ int main(void)
 	sp_interrupt_setup();
 
 	//timer_test_init();
-	cbdma_test_init();
+	//cbdma_test_init();
 	uart_isr_init();
 
 #ifdef RS485_TEST

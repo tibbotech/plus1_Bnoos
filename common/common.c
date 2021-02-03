@@ -1,4 +1,5 @@
-#include <types.h>
+#include <common_all.h>
+
 #if 0
 int memcmp(UINT8 *s1, UINT8 *s2, int n)
 {
@@ -41,7 +42,6 @@ int strlen(const char * str)
 }
 #else
 extern char __bss_end__;
-char linebuf[300];
 void *__brkval = &__bss_end__;
 void * _sbrk(int incr)
 {
@@ -68,4 +68,45 @@ int _getpid(void)
 {
 	return 0;
 }
+
+#ifdef USE_PSPRINTF
+char linebuf[300];
+#else
+int _write(int fd, const void *buf, int count)
+{
+	int ret = count;
+	while (count--) UART_putc_nl(*(char *)(buf++));
+	return ret;
+}
+
+int _read(int fd, void *buf, int count)
+{
+	return -1;
+}
+
+int _close(int fd)
+{
+	return 0;
+}
+
+int _open(const char *filename, int flags)
+{
+	return 0;
+}
+
+int _isatty(int fd)
+{
+	return 1;
+}
+
+int _lseek(int fd, int offset, int whence)
+{
+	return -1;
+}
+
+int _fstat(int fd, struct stat *buf)
+{
+	return 0;
+}
+#endif
 #endif

@@ -805,7 +805,6 @@ return(filament_width_nominal/temp*100);
 
 void tp_init()
 {
-	TRACE;
 #if MB(RUMBA) && ((TEMP_SENSOR_0==-1)||(TEMP_SENSOR_1==-1)||(TEMP_SENSOR_2==-1)||(TEMP_SENSOR_BED==-1))
   //disable RUMBA JTAG in case the thermocouple extension is plugged on top of JTAG connector
   MCUCR=(1<<JTD); 
@@ -926,14 +925,10 @@ void tp_init()
  #else
   ADS1015_Init();  //ADC init 
   void Marlin_temperature_callback(int vector);
-	TRACE;
   SP_start_timer2(Marlin_temperature_callback); //start 1ms timer
-	TRACE;
  #endif 
-	TRACE;
   delay(250);
 
-	TRACE;
 #ifdef HEATER_0_MINTEMP
   minttemp[0] = HEATER_0_MINTEMP;
   while(analog2temp(minttemp_raw[0], 0) < HEATER_0_MINTEMP) {
