@@ -54,6 +54,7 @@
     register (SREG). 
 */
 
+#include <sp_interrupt.h>
 #if defined(__DOXYGEN__)
 /** \def sei()
     \ingroup avr_interrupts
@@ -66,14 +67,7 @@
 #define sei()
 #else  /* !DOXYGEN */
 //# define sei()  __asm__ __volatile__ ("sei" ::)
-# define sei()	do{ \
-		asm volatile (															\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/; \
-	} while(0)
+# define sei()	portENABLE_INTERRUPTS()
 #endif /* DOXYGEN */
 
 #if defined(__DOXYGEN__)
@@ -88,14 +82,7 @@
 #define cli()
 #else  /* !DOXYGEN */
 //# define cli()  __asm__ __volatile__ ("cli" ::)
-# define cli() do{ \
-		asm volatile (															\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.			*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/; \
-	} while(0)
+# define cli()	portDISABLE_INTERRUPTS()
 #endif /* DOXYGEN */
 
 
