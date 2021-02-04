@@ -205,8 +205,14 @@ void setPwmFrequency(uint8_t pin, int val);
 #endif
 
 #ifndef CRITICAL_SECTION_START
+  //Protect the access to the position. Only required for AVR, as any 32bit CPU offers atomic access to 32bit variables
+  #if USE_ARDUINO
   #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
   #define CRITICAL_SECTION_END    SREG = _sreg;
+  #else
+  #define CRITICAL_SECTION_START
+  #define CRITICAL_SECTION_END
+  #endif
 #endif //CRITICAL_SECTION_START
 
 extern float homing_feedrate[];
