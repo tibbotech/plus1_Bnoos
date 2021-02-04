@@ -72,7 +72,7 @@ typedef void (*isr_t)(int);
 
 #else
 
-	#define portDISABLE_INTERRUPTS() do{ \
+	#define portDISABLE_INTERRUPTS() do{ TRACE("cli");\
 		asm volatile (															\
 			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
 			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
@@ -80,7 +80,7 @@ typedef void (*isr_t)(int);
 			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
 			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/ ;} while(0)
 
-	#define portENABLE_INTERRUPTS()	do{ \
+	#define portENABLE_INTERRUPTS()	do{ TRACE("sei");\
 		asm volatile (															\
 			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
 			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\

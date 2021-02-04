@@ -7,7 +7,7 @@
 #define EXTERN extern
 #endif
 
-#define TRACE printf(">>> %s: %s(%d)\n", __FILE__, __FUNCTION__, __LINE__)
+#define TRACE(tag) printf("\n[%s] %s: %s(%d)\n", tag, __FILE__, __FUNCTION__, __LINE__)
 
 EXTERN int Marlin_main(void);
 EXTERN void uart_isr(int vector);
