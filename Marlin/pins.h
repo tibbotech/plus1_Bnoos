@@ -3011,13 +3011,20 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define E0_ENABLE_PIN      63   //GPIOP7_7
 
 #define KNOWN_BOARD 1
-#undef HEATER_0_PIN
-#define HEATER_0_PIN       38   //GPIOP4_6
-#undef HEATER_BED_PIN
-#define HEATER_BED_PIN     39    //GPIOP4_7
 
-#define TEMP_I2C_SDA        18   //GPIOP2_2
-#define TEMP_I2C_SCL        19   //GPIOP2_3
+#undef HEATER_0_PIN
+#define HEATER_0_PIN       39   //GPIOP4_7
+
+#undef HEATER_BED_PIN
+#define HEATER_BED_PIN     37    //GPIOP4_5
+
+#undef FAN_PIN
+#define FAN_PIN				38  //GPIOP4_6
+
+#define TEMP_I2C_SDA        9   //GPIOP1_1
+#define TEMP_I2C_SCL        8   //GPIOP1_0
+
+
 #define TEMP_0_PIN         0xFF  //used the define not pin number
 #define TEMP_BED_PIN       0xFF  //used the define not pin number
 #endif

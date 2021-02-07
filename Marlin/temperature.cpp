@@ -141,7 +141,7 @@ static volatile bool temp_meas_ready = false;
 static int minttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_LO_TEMP , HEATER_1_RAW_LO_TEMP , HEATER_2_RAW_LO_TEMP );
 static int maxttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_HI_TEMP , HEATER_1_RAW_HI_TEMP , HEATER_2_RAW_HI_TEMP );
 static int minttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 0, 0, 0 );
-static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 16383, 16383, 16383 );
+static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEAT_MAX_TEMP, HEAT_MAX_TEMP, HEAT_MAX_TEMP );
 //static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP; /* No bed mintemp error implemented?!? */
 #ifdef BED_MAXTEMP
 static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
@@ -773,7 +773,7 @@ static void updateTemperaturesFromRawValues()
 // For converting raw Filament Width to milimeters 
 #ifdef FILAMENT_SENSOR
 float analog2widthFil() { 
-return current_raw_filwidth/16383.0*5.0; 
+return current_raw_filwidth/HEAT_MAX_TEMP.0*5.0; 
 //return current_raw_filwidth; 
 } 
  
@@ -822,7 +822,7 @@ void tp_init()
   }
 
   #if defined(HEATER_0_PIN) && (HEATER_0_PIN > -1) 
-    SET_OUTPUT(HEATER_0_PIN);
+    SET_OD_OUTPUT(HEATER_0_PIN);	
   #endif  
   #if defined(HEATER_1_PIN) && (HEATER_1_PIN > -1) 
     SET_OUTPUT(HEATER_1_PIN);
@@ -831,10 +831,10 @@ void tp_init()
     SET_OUTPUT(HEATER_2_PIN);
   #endif  
   #if defined(HEATER_BED_PIN) && (HEATER_BED_PIN > -1) 
-    SET_OUTPUT(HEATER_BED_PIN);
+    SET_OD_OUTPUT(HEATER_BED_PIN);
   #endif  
   #if defined(FAN_PIN) && (FAN_PIN > -1) 
-    SET_OUTPUT(FAN_PIN);
+    SET_OD_OUTPUT(FAN_PIN);
     #ifdef FAST_PWM_FAN
     setPwmFrequency(FAN_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
     #endif
@@ -1560,7 +1560,7 @@ void Marlin_temperature_callback(int vector)
 	 	 #ifdef USE_ARDUINO
         raw_temp_0_value += ADC;
 		 #else
-			raw_temp_0_value = ADS1015_Read(0);
+			raw_temp_0_value += ADS1015_Read(0);
 		 #endif
       #endif
       #ifdef HEATER_0_USES_MAX6675 // TODO remove the blocking
@@ -1586,7 +1586,7 @@ void Marlin_temperature_callback(int vector)
 	  	 #ifdef USE_ARDUINO
         raw_temp_bed_value += ADC;
 		 #else
-		  	raw_temp_bed_value = ADS1015_Read(1);
+		  	raw_temp_bed_value += ADS1015_Read(1);
 		 #endif
       #endif
       temp_state = 4;

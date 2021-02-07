@@ -193,7 +193,7 @@ int temp;
 					ADS1015_REG_CONFIG_MODE_CONTIN;   // continue mode (default)
 	
     // Set PGA/voltage range
-    ADS1015_CONFIG |= ADS1015_REG_CONFIG_PGA_4_096V;
+    ADS1015_CONFIG |= ADS1015_REG_CONFIG_PGA_6_144V;
 	if(channel<3)
 	{
 		switch (channel)
@@ -233,7 +233,7 @@ ADS1015_CONFIG  = ADS1015_REG_CONFIG_CQUE_NONE    | // Disable the comparator (d
 				ADS1015_REG_CONFIG_MODE_CONTIN;   // Single-shot mode (default)
 
 // Set PGA/voltage range
-	ADS1015_CONFIG |= ADS1015_REG_CONFIG_PGA_4_096V;
+	ADS1015_CONFIG |= ADS1015_REG_CONFIG_PGA_6_144V;
 	switch (channel)
 	{
 		case (0):
