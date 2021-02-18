@@ -170,13 +170,13 @@ asm volatile ( \
 #else
 #define MultiU16X8toH16(intRes, charIn1, intIn2) \
 do{                                              \
-   unsigned int tmp = charIn1 * intIn2;          \
+   uint32_t tmp = charIn1 * intIn2;          \
    intRes = tmp >> 16;                           \
 } while(0)
 
 #define MultiU24X24toH16(intRes, longIn1, LongIn2) \
 do{                                                \
-   unsigned int tmp = longIn1 * LongIn2;           \
+   uint64_t tmp = longIn1 * LongIn2;           \
    intRes = tmp >> 24;                             \
 } while(0)
 #endif
