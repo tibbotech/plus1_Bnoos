@@ -6,6 +6,7 @@
 #include "common_all.h"
 #include "cache.h"
 #include "stc.h"
+#include "gpio_drv.h"
 
 #define A_and_B_chip   //A and B chip running simultaneously
 //#define A_chip_only       //A chip only
@@ -180,6 +181,12 @@ int main(void)
 
 	printf("NonOS boot OK!!!\n");
 	//task_dbg();
+#if 0
+    GPIO_F_SET(21,1);
+    GPIO_M_SET(21,1);
+    GPIO_E_SET(21,1);
+    GPIO_O_SET(21,1);
+#endif
 	Marlin_main();
 	while(1);
 

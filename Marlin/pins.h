@@ -2988,27 +2988,41 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #undef  E0_DIR_PIN
 #undef  E0_ENABLE_PIN
 
-#define X_STEP_PIN          8   //GPIOP1_0
-#define X_DIR_PIN           9   //GPIOP1_1
-#define X_ENABLE_PIN       10   //GPIOP1_2
-#define X_MIN_PIN          11   //GPIOP1_3
-#define X_MAX_PIN          12   //GPIOP1_4
+#undef  Y2_STEP_PIN
+#undef  Y2_DIR_PIN
+#undef  Y2_ENABLE_PIN
+#undef  Z2_STEP_PIN
+#undef  Z2_DIR_PIN
+#undef  Z2_ENABLE_PIN
+#undef  E1_STEP_PIN
+#undef  E1_DIR_PIN
+#undef  E1_ENABLE_PIN
+#undef  SDPOWER
+#undef  SDSS
+#undef  LED_PIN
+#define LED_PIN -1
 
-#define Y_STEP_PIN         13   //GPIOP1_5
-#define Y_DIR_PIN          14   //GPIOP1_6
-#define Y_ENABLE_PIN       15   //GPIOP1_74
-#define Y_MIN_PIN           0   //GPIOP0_0
-#define Y_MAX_PIN           1   //GPIOP0_1
+#define X_STEP_PIN         20   //GPIOP1_0
+#define X_DIR_PIN          18   //GPIOP1_1
+#define X_ENABLE_PIN       13   //GPIOP1_2
+#define X_MIN_PIN          34   //GPIOP1_3
+#define X_MAX_PIN          -1   //GPIOP1_4
 
-#define Z_STEP_PIN         56   //GPIOP7_0
-#define Z_DIR_PIN          57   //GPIOP7_1
-#define Z_ENABLE_PIN       58   //GPIOP7_2
-#define Z_MIN_PIN          59   //GPIOP7_3
-#define Z_MAX_PIN          60   //GPIOP7_4
+#define Y_STEP_PIN         21   //GPIOP1_5
+#define Y_DIR_PIN          19   //GPIOP1_6
+#define Y_ENABLE_PIN       16   //GPIOP1_74
+#define Y_MIN_PIN          28   //GPIOP0_0
+#define Y_MAX_PIN          -1   //GPIOP0_1
 
-#define E0_STEP_PIN        61   //GPIOP7_5
-#define E0_DIR_PIN         62   //GPIOP7_6
-#define E0_ENABLE_PIN      63   //GPIOP7_7
+#define Z_STEP_PIN         43   //GPIOP7_0
+#define Z_DIR_PIN          41   //GPIOP7_1
+#define Z_ENABLE_PIN       17   //GPIOP7_2
+#define Z_MIN_PIN          29   //GPIOP7_3
+#define Z_MAX_PIN          -1   //GPIOP7_4
+
+#define E0_STEP_PIN        11   //GPIOP7_5
+#define E0_DIR_PIN         12   //GPIOP7_6
+#define E0_ENABLE_PIN      10   //GPIOP7_7
 
 #define KNOWN_BOARD 1
 
@@ -3024,7 +3038,8 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define TEMP_I2C_SDA        9   //GPIOP1_1
 #define TEMP_I2C_SCL        8   //GPIOP1_0
 
-
+#undef TEMP_0_PIN
+#undef TEMP_BED_PIN
 #define TEMP_0_PIN         0xFF  //used the define not pin number
 #define TEMP_BED_PIN       0xFF  //used the define not pin number
 #endif
