@@ -1,6 +1,9 @@
 #ifndef _EMUIO_H_
 #define _EMUIO_H_
 
+#include <stdio.h>
+#include <string.h>
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
 #else
