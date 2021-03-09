@@ -595,7 +595,7 @@ void setup()
   // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
   Config_RetrieveSettings();
 
-  //tp_init();    // Initialize temperature loop
+  tp_init();    // Initialize temperature loop
   plan_init();  // Initialize planner;
   watchdog_init();
   st_init();    // Initialize stepper, this enables interrupts!
@@ -603,7 +603,7 @@ void setup()
   servo_init();
   
 
-  //lcd_init();
+ // lcd_init();
 //  _delay_ms(1000);	// wait 1sec to display the splash screen
 
   #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
@@ -620,11 +620,22 @@ void setup()
   setup_homepin();
 }
 
+volatile int temp_0=0,temp_1=0;
+#include "temperature_ads1015.h"
+
+void get_temp(void)
+{
+	temp_0 = ADS1015_Read(2);
+	temp_1 = ADS1015_Read(1);
+
+}
 
 void loop()
 {
   if(buflen < (BUFSIZE-1))
+  {
     get_command();
+  }
   #ifdef SDSUPPORT
   card.checkautostart(false);
   #endif
@@ -666,12 +677,16 @@ void loop()
   manage_inactivity();
   checkHitEndstops();
   lcd_update();
+  //get_temp();
 }
 
 void get_command()
 {
   while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
     serial_char = MYSERIAL.read();
+	//if(MYSERIAL.available() == 0)
+       //printf(">>>cmdbuffer = %s\n",cmdbuffer[bufindw]);
+	//printf("get command = %c\n",serial_char);
     if(serial_char == '\n' ||
        serial_char == '\r' ||
        (serial_char == ':' && comment_mode == false) ||
@@ -1434,7 +1449,7 @@ void process_commands()
        #endif 
       break;
       #endif //FWRETRACT
-    case 28: //G28 Home all Axis one at a time
+      case 28: //G28 Home all Axis one at a time
 #ifdef ENABLE_AUTO_BED_LEVELING
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
 #endif //ENABLE_AUTO_BED_LEVELING
@@ -2506,6 +2521,7 @@ Sigma_Exit:
       #endif //TEMP_RESIDENCY_TIME
           if( (millis() - codenum) > 1000UL )
           { //Print Temp Reading and remaining time every 1 second while heating up/cooling down
+            //get_temp();
             SERIAL_PROTOCOLPGM("T:");
             SERIAL_PROTOCOL_F(degHotend(tmp_extruder),1);
             SERIAL_PROTOCOLPGM(" E:");
@@ -2556,12 +2572,13 @@ Sigma_Exit:
           CooldownNoWait = false;
         }
         codenum = millis();
-        
+
         cancel_heatup = false;
         target_direction = isHeatingBed(); // true if heating, false if cooling
 
         while ( (target_direction)&&(!cancel_heatup) ? (isHeatingBed()) : (isCoolingBed()&&(CooldownNoWait==false)) )
         {
+          //get_temp();
           if(( millis() - codenum) > 1000 ) //Print Temp Reading every 1 second while heating up.
           {
             float tt=degHotend(active_extruder);

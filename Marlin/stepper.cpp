@@ -193,6 +193,9 @@ do{                                                \
 #define DISABLE_STEPPER_DRIVER_INTERRUPT() STC_REG->timer3_ctl &= TIMER3_STOP
 #endif
 
+#undef OCR1A
+#define OCR1A STC_REG->timer3_cnt
+
 void checkHitEndstops()												//xt_qes:check state of endstop.what is endstop?
 {
  if( endstop_x_hit || endstop_y_hit || endstop_z_hit) {
@@ -269,11 +272,11 @@ void step_wait(){
 
 FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {  //get timer according to the step_rate in the speed table.
   unsigned short timer;
-  if(step_rate > MAX_STEP_FREQUENCY) step_rate = MAX_STEP_FREQUENCY;	//
+  if(step_rate > MAX_STEP_FREQUENCY) step_rate = MAX_STEP_FREQUENCY;
 
   if(step_rate > 20000) { // If steprate > 20kHz >> step 4 times
-    step_rate = (step_rate >> 2)&0x3fff;								//为什么速度快需要拆解成4次??? >>2 
-    step_loops = 4;														//关系到bresenham三轴步进的循环次数
+    step_rate = (step_rate >> 2)&0x3fff;
+    step_loops = 4;
   }
   else if(step_rate > 10000) { // If steprate > 10kHz >> step 2 times
     step_rate = (step_rate >> 1)&0x7fff;
@@ -282,46 +285,28 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {  //get timer 
   else {
     step_loops = 1;
   }
-#if 1
-  #define STEPPER_TIMER_RATE 2000000 // 2 Mhz
-  timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
-#else
+#if USE_ARDUINO
   if(step_rate < (F_CPU/500000)) step_rate = (F_CPU/500000);			//16MHz/500kHz  ???
   step_rate -= (F_CPU/500000); // Correct for minimal speed
   if(step_rate >= (8*256)){ // higher step rate
-  #if USE_ARDUINO
     unsigned short table_address = (unsigned short)&speed_lookuptable_fast[(unsigned char)(step_rate>>8)][0];
     unsigned char tmp_step_rate = (step_rate & 0x00ff);
     unsigned short gain = (unsigned short)pgm_read_word_near(table_address+2);
     MultiU16X8toH16(timer, tmp_step_rate, gain);
     timer = (unsigned short)pgm_read_word_near(table_address) - timer;
-  #else
-    unsigned short i = step_rate >> 8;
-    unsigned short table_address_value = (F_CPU/8)/(i << 8 + 32); //timer_freq = F_CPU/8, F_CPU/1000000*2 = 32
-    unsigned short next_table_address_value = (F_CPU/8)/((i+1) << 8 + 32);
-    unsigned char tmp_step_rate = (step_rate & 0x00ff);
-    MultiU16X8toH16(timer, tmp_step_rate, next_table_address_value);
-    timer = table_address_value - timer;
-  #endif
   }
   else { // lower step rates
-  #if USE_ARDUINO
     unsigned short table_address = (unsigned short)&speed_lookuptable_slow[0][0];
     table_address += ((step_rate)>>1) & 0xfffc;
     timer = (unsigned short)pgm_read_word_near(table_address);
     timer -= (((unsigned short)pgm_read_word_near(table_address+2) * (unsigned char)(step_rate & 0x0007))>>3);
-  #else
-    unsigned short i = ((step_rate)>>1) & 0xfffc;
-    unsigned short table_address_value = (F_CPU/8)/(i << 3 + 32); //timer_freq = F_CPU/8, F_CPU/1000000*2 = 32
-    unsigned short next_table_address_value = (F_CPU/8)/((i+1) << 3 + 32);
-	unsigned char tmp_step_rate = step_rate & 0x0007;
-	timer = table_address_value;
-	timer = timer - (tmp_step_rate * next_table_address_value) >> 3;
-  #endif
   }
   if(timer < 100) { timer = 100; MYSERIAL.print(MSG_STEPPER_TOO_HIGH); MYSERIAL.println(step_rate); }//(20kHz this should never happen)
+#else
+  #define STEPPER_TIMER_RATE 2000000 // 2 Mhz
+  timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
+  //if (timer<100) timer=100;
 #endif
-  timer = (timer * 9)/2000; //原OCR=2000,为1ms
   return timer;
 }
 
@@ -343,11 +328,8 @@ FORCE_INLINE void trapezoid_generator_reset() {
   acc_step_rate = current_block->initial_rate;
   acceleration_time = calc_timer(acc_step_rate);
 
-#if USE_ARDUINO
   OCR1A = acceleration_time;
-#else
-  STC_REG->timer3_pres_val = acceleration_time;
-#endif
+  ENABLE_STEPPER_DRIVER_INTERRUPT();
 
 //    SERIAL_ECHO_START;
 //    SERIAL_ECHOPGM("advance :");
@@ -385,11 +367,8 @@ void Marlin_stepper_callback(int vector)
       #ifdef Z_LATE_ENABLE
         if(current_block->steps_z > 0) {
           enable_z();
-		#ifdef USE_ARDUINO
           OCR1A = 2000; //1ms wait
-        #else
-		  STC_REG->timer3_pres_val = 9;
-        #endif
+          ENABLE_STEPPER_DRIVER_INTERRUPT();
           return;
         }
       #endif
@@ -399,17 +378,13 @@ void Marlin_stepper_callback(int vector)
 //      #endif
     }
     else {
-	  #ifdef USE_ARDUINO
         OCR1A=2000; // 1kHz.
-      #else
-		STC_REG->timer3_pres_val = 9;
-	  #endif
+        ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
   }
-
   if (current_block != NULL) {
     // Set directions TO DO This should be done once during init of trapezoid. Endstops -> interrupt
-    out_bits = current_block->direction_bits; //这个block的方向位，“1”反向，“0”正向，每一个位代表一个轴的方向
+    out_bits = current_block->direction_bits;
 
 
     // Set the direction bits (X_AXIS=A_AXIS and Y_AXIS=B_AXIS for COREXY)
@@ -481,11 +456,11 @@ void Marlin_stepper_callback(int vector)
         #endif          
         {
           #if defined(X_MIN_PIN) && X_MIN_PIN > -1
-            bool x_min_endstop=(READ(X_MIN_PIN) != X_MIN_ENDSTOP_INVERTING);//读出限位器低电平，x_min_endstop=1
-            if(x_min_endstop && old_x_min_endstop && (current_block->steps_x > 0)) {//当前限位器低电平&old&x方向需要移动
-              endstops_trigsteps[X_AXIS] = count_position[X_AXIS];                  //也就是说触发限位器之后，需要第二次进入中断才能停止电机移动
+            bool x_min_endstop=(READ(X_MIN_PIN) != X_MIN_ENDSTOP_INVERTING);
+            if(x_min_endstop && old_x_min_endstop && (current_block->steps_x > 0)) {
+              endstops_trigsteps[X_AXIS] = count_position[X_AXIS];
               endstop_x_hit=true;
-              step_events_completed = current_block->step_event_count;//这个才是终止移动的判断条件
+              step_events_completed = current_block->step_event_count;
             }
             old_x_min_endstop = x_min_endstop;//old_x_min_endstop default val is 0
           #endif
@@ -752,26 +727,25 @@ void Marlin_stepper_callback(int vector)
       #endif //!ADVANCE
       #endif
       step_events_completed += 1;
-      if(step_events_completed >= current_block->step_event_count) break; //step_event_count可能经历多个step_loops，且不一定是整数倍
+      if(step_events_completed >= current_block->step_event_count) break;
     }
     // Calculare new timer value
     unsigned short timer;
     unsigned short step_rate;
-    if (step_events_completed <= (unsigned long int)current_block->accelerate_until) { //until梯形曲线中的加速距离
+    if (step_events_completed <= (unsigned long int)current_block->accelerate_until) {
       MultiU24X24toH16(acc_step_rate, acceleration_time, current_block->acceleration_rate); //v=a*t
       acc_step_rate += current_block->initial_rate;	 //vt=a*t+v0
 
       // upper limit
-      if(acc_step_rate > current_block->nominal_rate) //超过额定速率的处理
+      if(acc_step_rate > current_block->nominal_rate)
         acc_step_rate = current_block->nominal_rate;
 
       // step_rate to timer interval
-      timer = calc_timer(acc_step_rate); //传入加速阶段的速率
-	#if USE_ARDUINO
+      timer = calc_timer(acc_step_rate); //浼犲叆鍔犻�熼樁娈电殑閫熺巼
+
       OCR1A = timer;
-	#else
-	  STC_REG->timer3_pres_val = timer;
-    #endif
+      ENABLE_STEPPER_DRIVER_INTERRUPT();
+
       acceleration_time += timer;
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -784,7 +758,7 @@ void Marlin_stepper_callback(int vector)
 
       #endif
     }
-    else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {//after梯形曲线中的匀速和加速距离
+    else if (step_events_completed > (unsigned long int)current_block->decelerate_after) {
       MultiU24X24toH16(step_rate, deceleration_time, current_block->acceleration_rate);
 
       if(step_rate > acc_step_rate) { // Check step_rate stays positive
@@ -800,11 +774,10 @@ void Marlin_stepper_callback(int vector)
 
       // step_rate to timer interval
       timer = calc_timer(step_rate);
-	#if USE_ARDUINO
+
       OCR1A = timer;
-	#else
-	  STC_REG->timer3_pres_val = timer;
-    #endif
+      ENABLE_STEPPER_DRIVER_INTERRUPT();
+
 	  deceleration_time += timer;
 	  #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
@@ -817,11 +790,8 @@ void Marlin_stepper_callback(int vector)
       #endif //ADVANCE
     }
     else {
-	#if USE_ARDUINO
       OCR1A = OCR1A_nominal;
-	#else
-	  STC_REG->timer3_pres_val = OCR1A_nominal;
-	#endif
+      ENABLE_STEPPER_DRIVER_INTERRUPT();
       // ensure we're running at the correct step rate, even if we just came off an acceleration
       step_loops = step_loops_nominal;
     }

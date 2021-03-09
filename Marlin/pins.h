@@ -546,7 +546,7 @@
 // #define RAMPS_V_1_0
 
 
-#if (IS_RAMPS && !MB(RAMPS_OLD)) || MB(3DRAG) || MB(AZTEEG_X3) || MB(AZTEEG_X3_PRO)
+#if (IS_RAMPS && !MB(RAMPS_OLD)) || MB(3DRAG) || MB(AZTEEG_X3) || MB(AZTEEG_X3_PRO)//xt_debug
 
   #define LARGE_FLASH true
 
@@ -591,7 +591,7 @@
 
     #define BEEPER             33
 
-  #else
+  #else//xt_debug
 
     #define X_STEP_PIN         54
     #define X_DIR_PIN          55
@@ -649,14 +649,14 @@
       #define E4_DIR_PIN         37
       #define E4_ENABLE_PIN      42
     #endif
-
+//xt_debug
     #define SDPOWER            -1
     #define SDSS               53
     #define LED_PIN            13
   #endif
 
   #if MB(RAMPS_13_EFB) || MB(RAMPS_13_EFF) || MB(AZTEEG_X3) || MB(AZTEEG_X3_PRO)
-    #define FAN_PIN            9 // (Sprinter config)
+    #define FAN_PIN            9 // (Sprinter config)//xt_debug
   #else
     #define FAN_PIN            4 // IO pin. Buffer needed
   #endif
@@ -669,7 +669,7 @@
     #define CONTROLLERFAN_PIN  -1 //Pin used for the fan to cool controller
   #endif
 
-  #define PS_ON_PIN          12
+  #define PS_ON_PIN          12//xt_debug
 
   #if defined(REPRAP_DISCOUNT_SMART_CONTROLLER) || defined(G3D_PANEL)
     #define KILL_PIN           41
@@ -2968,7 +2968,6 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
                         analogInputToDigitalPin(TEMP_0_PIN), analogInputToDigitalPin(TEMP_1_PIN), analogInputToDigitalPin(TEMP_2_PIN), analogInputToDigitalPin(TEMP_BED_PIN) }
 
 #if MB(RAMPS_13_EFB)
-
 #undef  X_STEP_PIN
 #undef  X_DIR_PIN
 #undef  X_ENABLE_PIN
@@ -3002,41 +3001,41 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #undef  LED_PIN
 #define LED_PIN -1
 
-#define X_STEP_PIN         20   //GPIOP1_0
-#define X_DIR_PIN          18   //GPIOP1_1
-#define X_ENABLE_PIN       13   //GPIOP1_2
-#define X_MIN_PIN          34   //GPIOP1_3
-#define X_MAX_PIN          -1   //GPIOP1_4
+#define X_STEP_PIN         39   //GPIOP4_7
+#define X_DIR_PIN          37   //GPIOP4_5
+#define X_ENABLE_PIN       38   //GPIOP4_6
+#define X_MIN_PIN          20   //GPIOP2_4
+#define X_MAX_PIN          -1
 
-#define Y_STEP_PIN         21   //GPIOP1_5
-#define Y_DIR_PIN          19   //GPIOP1_6
-#define Y_ENABLE_PIN       16   //GPIOP1_74
-#define Y_MIN_PIN          28   //GPIOP0_0
-#define Y_MAX_PIN          -1   //GPIOP0_1
+#define Y_STEP_PIN         35   //GPIOP4_3
+#define Y_DIR_PIN          36   //GPIOP4_4
+#define Y_ENABLE_PIN       31   //GPIOP3_7
+#define Y_MIN_PIN          23   //GPIOP2_7
+#define Y_MAX_PIN          -1
 
-#define Z_STEP_PIN         43   //GPIOP7_0
-#define Z_DIR_PIN          41   //GPIOP7_1
-#define Z_ENABLE_PIN       17   //GPIOP7_2
-#define Z_MIN_PIN          29   //GPIOP7_3
-#define Z_MAX_PIN          -1   //GPIOP7_4
+#define Z_STEP_PIN         32   //GPIOP4_0
+#define Z_DIR_PIN          34   //GPIOP4_2
+#define Z_ENABLE_PIN       33   //GPIOP4_1
+#define Z_MIN_PIN          24   //GPIOP3_0
+#define Z_MAX_PIN          -1
 
-#define E0_STEP_PIN        11   //GPIOP7_5
-#define E0_DIR_PIN         12   //GPIOP7_6
-#define E0_ENABLE_PIN      10   //GPIOP7_7
+#define E0_STEP_PIN        26   //GPIOP3_2
+#define E0_DIR_PIN         28   //GPIOP3_4
+#define E0_ENABLE_PIN      30   //GPIOP3_6
 
 #define KNOWN_BOARD 1
 
 #undef HEATER_0_PIN
-#define HEATER_0_PIN       39   //GPIOP4_7
+#define HEATER_0_PIN       17   //GPIOP2_1
 
 #undef HEATER_BED_PIN
-#define HEATER_BED_PIN     37    //GPIOP4_5
+#define HEATER_BED_PIN     21   //GPIOP2_5
 
 #undef FAN_PIN
-#define FAN_PIN				38  //GPIOP4_6
+#define FAN_PIN            19   //GPIOP2_3
 
-#define TEMP_I2C_SDA        9   //GPIOP1_1
-#define TEMP_I2C_SCL        8   //GPIOP1_0
+#define TEMP_I2C_SDA       13   //GPIOP1_5
+#define TEMP_I2C_SCL       12   //GPIOP1_4
 
 #undef TEMP_0_PIN
 #undef TEMP_BED_PIN

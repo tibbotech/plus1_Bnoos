@@ -27,7 +27,7 @@
 
 void rs485_init(int TX_pin, int RX_pin, int RTS_pin)
 {
-    
+    return;
 	/* uart2 pinmux : x3,UA2_TX, X4,UA2_RX */
 	TX_pin -= 7;
 	RX_pin -= 7;

@@ -106,6 +106,7 @@ FORCE_INLINE float degTargetBed() {
 
 FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {  
   target_temperature[extruder] = celsius;
+  //printf("\n  set target_temp = %d  \n",target_temperature[extruder]);
 };
 
 FORCE_INLINE void setTargetBed(const float &celsius) {  

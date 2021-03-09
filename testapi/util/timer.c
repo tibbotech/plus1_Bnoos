@@ -19,10 +19,12 @@
 #include "cache.h"
 #include "sp_interrupt.h"
 
-#define TIMER3_TICKS		(90 - 1)		/* 1s */
+#define TIMER3_TICKS		(9 - 1)		/* 1s */
 #define TIMER2_TICKS		(90 - 1)		/* 1s */
 
+#define TIMER_CONFIG_SYS    (0 << 2)    /* src: system clock */
 #define TIMER_CONFIG_STC	(1 << 2)	/* src: stc */
+#define TIMER_ONESHOT       (0 << 1)    /* timer one-shot operation*/
 #define TIMER_RELOAD		(1 << 1)	/* timer auto reload */
 #define TIMER_RUN 			(1 << 0)	/* timer run */
 #define TIMER_STOP			(0 << 0)	/* timer stop */
@@ -90,12 +92,11 @@ void SP_start_timer3(void (*timer_callback)(int))
 {
     isr_t isr = timer_callback;
 
-    STC_REG->timer3_ctl = TIMER_CONFIG_STC | TIMER_RELOAD;
-    STC_REG->timer3_pres_val = TIMER_1MS_PRES_VALUE*74;
-    STC_REG->timer3_reload = TIMER3_TICKS;
-    STC_REG->timer3_cnt = TIMER3_TICKS;
+    STC_REG->timer3_pres_val = 100;
+    //STC_REG->timer3_reload = TIMER3_TICKS;
+    STC_REG->timer3_cnt = 0x4000;
 
     interrupt_register(TIMER3_INT, "TIMER3", isr, 0);
 
-    STC_REG->timer3_ctl |= TIMER_RUN;
+    STC_REG->timer3_ctl |= TIMER_CONFIG_SYS | TIMER_ONESHOT | TIMER_RUN;
 }

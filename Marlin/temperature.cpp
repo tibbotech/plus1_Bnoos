@@ -141,7 +141,7 @@ static volatile bool temp_meas_ready = false;
 static int minttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_LO_TEMP , HEATER_1_RAW_LO_TEMP , HEATER_2_RAW_LO_TEMP );
 static int maxttemp_raw[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_RAW_HI_TEMP , HEATER_1_RAW_HI_TEMP , HEATER_2_RAW_HI_TEMP );
 static int minttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 0, 0, 0 );
-static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEAT_MAX_TEMP, HEAT_MAX_TEMP, HEAT_MAX_TEMP );
+static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 26080, 26080, 26080 );//ARRAY_BY_EXTRUDERS( 16383, 16383, 16383 );
 //static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP; /* No bed mintemp error implemented?!? */
 #ifdef BED_MAXTEMP
 static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
@@ -476,6 +476,7 @@ void manage_heater()
           #define K2 (1.0-K1)
           dTerm[e] = (Kd * (pid_input - temp_dState[e]))*K2 + (K1 * dTerm[e]);
           pid_output = pTerm[e] + iTerm[e] - dTerm[e];
+
           if (pid_output > PID_MAX) {
             if (pid_error[e] > 0 )  temp_iState[e] -= pid_error[e]; // conditional un-integration
             pid_output=PID_MAX;
@@ -509,13 +510,16 @@ void manage_heater()
       pid_output = PID_MAX;
     }
   #endif
-
+    //printf(" manger heat  %d %d  %d  %d \n",(int)current_temperature[0] , minttemp[0],maxttemp[0],target_temperature[0]);
     // Check if temperature is within the correct range
     if((current_temperature[e] > minttemp[e]) && (current_temperature[e] < maxttemp[e])) 
     {
       soft_pwm[e] = (int)pid_output >> 1;
+      //printf(" soft_pwm[e]t=%d \n",soft_pwm[e]);
+
     }
     else {
+      //printf(" no heart \n");
       soft_pwm[e] = 0;
     }
 
@@ -608,19 +612,21 @@ void manage_heater()
 
     #elif !defined(BED_LIMIT_SWITCHING)
       // Check if temperature is within the correct range
-      if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP))
+      if(((int)current_temperature_bed > BED_MINTEMP) && ((int)current_temperature_bed < BED_MAXTEMP))
       {
-        if(current_temperature_bed >= target_temperature_bed)
+        if((int)current_temperature_bed >= target_temperature_bed)
         {
           soft_pwm_bed = 0;
         }
         else 
         {
+          //printf("\n ### bed heat #### \n");
           soft_pwm_bed = MAX_BED_POWER>>1;
         }
       }
       else
       {
+      //printf("\n ### bed not  heat #### \n");
         soft_pwm_bed = 0;
         WRITE(HEATER_BED_PIN,LOW);
       }
@@ -671,6 +677,7 @@ void manage_heater()
 #define PGM_RD_W(x)   (short)pgm_read_word(&x)
 // Derived from RepRap FiveD extruder::getTemperature()
 // For hot end temperature measurement.
+
 static float analog2temp(int raw, uint8_t e) {
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   if(e > EXTRUDERS)
@@ -773,7 +780,7 @@ static void updateTemperaturesFromRawValues()
 // For converting raw Filament Width to milimeters 
 #ifdef FILAMENT_SENSOR
 float analog2widthFil() { 
-return current_raw_filwidth/HEAT_MAX_TEMP.0*5.0; 
+return current_raw_filwidth/16383.0*5.0; 
 //return current_raw_filwidth; 
 } 
  
@@ -821,8 +828,9 @@ void tp_init()
 #endif //PIDTEMPBED
   }
 
+
   #if defined(HEATER_0_PIN) && (HEATER_0_PIN > -1) 
-    SET_OD_OUTPUT(HEATER_0_PIN);	
+    SET_OD_OUTPUT(HEATER_0_PIN);
   #endif  
   #if defined(HEATER_1_PIN) && (HEATER_1_PIN > -1) 
     SET_OUTPUT(HEATER_1_PIN);
@@ -834,7 +842,7 @@ void tp_init()
     SET_OD_OUTPUT(HEATER_BED_PIN);
   #endif  
   #if defined(FAN_PIN) && (FAN_PIN > -1) 
-    SET_OD_OUTPUT(FAN_PIN);
+    SET_OUTPUT(FAN_PIN);
     #ifdef FAST_PWM_FAN
     setPwmFrequency(FAN_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
     #endif
@@ -920,8 +928,6 @@ void tp_init()
   // Wait for temperature measurement to settle
  #else
   ADS1015_Init();  //ADC init 
-  void Marlin_temperature_callback(int vector);
-  SP_start_timer2(Marlin_temperature_callback); //start 1ms timer
  #endif 
   delay(250);
 
@@ -937,6 +943,7 @@ void tp_init()
 #endif //MINTEMP
 #ifdef HEATER_0_MAXTEMP
   maxttemp[0] = HEATER_0_MAXTEMP;
+  //printf("\n maxttemp_raw[0]=%d \n",maxttemp_raw[0]);
   while(analog2temp(maxttemp_raw[0], 0) > HEATER_0_MAXTEMP) {
 #if HEATER_0_RAW_LO_TEMP < HEATER_0_RAW_HI_TEMP
     maxttemp_raw[0] -= OVERSAMPLENR;
@@ -1008,6 +1015,9 @@ void tp_init()
 #endif
   }
 #endif //BED_MAXTEMP
+
+  void Marlin_temperature_callback(int vector);
+  SP_start_timer2(Marlin_temperature_callback); //start 1ms timer
 }
 
 void setWatch() 
@@ -1154,9 +1164,9 @@ void bed_max_temp_error(void) {
   WRITE(HEATER_BED_PIN, 0);
 #endif
   if(IsStopped() == false) {
-    //SERIAL_ERROR_START;
-    //SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
-    //LCD_ALERTMESSAGEPGM("Err: MAXTEMP BED");
+    SERIAL_ERROR_START;
+    SERIAL_ERRORLNPGM("Temperature heated bed switched off. MAXTEMP triggered !!");
+    LCD_ALERTMESSAGEPGM("Err: MAXTEMP BED");
   }
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
   Stop();
@@ -1219,6 +1229,7 @@ int read_max6675()
 }
 #endif
 
+extern volatile int temp_0,temp_1;
 
 // Timer 0 is shared with millies
 #ifdef USE_ARDUINO   // thq 
@@ -1274,6 +1285,7 @@ void Marlin_temperature_callback(int vector)
   if(pwm_count == 0){
     soft_pwm_0 = soft_pwm[0];
     if(soft_pwm_0 > 0) { 
+      //printf("\n ####  heat   0  pin soft_pwm_0=%d ########\n",soft_pwm_0);
       WRITE(HEATER_0_PIN,1);
 #ifdef HEATERS_PARALLEL
       WRITE(HEATER_1_PIN,1);
@@ -1540,7 +1552,7 @@ void Marlin_temperature_callback(int vector)
   } //if ((pwm_count % 64) == 0) {
   
 #endif //ifndef SLOW_PWM_HEATERS
-  
+
   switch(temp_state) {
     case 0: // Prepare TEMP_0
       #if defined(USE_ARDUINO) &&defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)	 
@@ -1557,11 +1569,12 @@ void Marlin_temperature_callback(int vector)
       break;
     case 1: // Measure TEMP_0
       #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1)
-	 	 #ifdef USE_ARDUINO
-        raw_temp_0_value += ADC;
-		 #else
-			raw_temp_0_value += ADS1015_Read(0);
-		 #endif
+        #ifdef USE_ARDUINO
+          raw_temp_0_value += ADC;
+        #else
+          raw_temp_0_value += temp_0;
+          //raw_temp_0_value += 170;//ADS1015_Read(2);
+        #endif
       #endif
       #ifdef HEATER_0_USES_MAX6675 // TODO remove the blocking
         raw_temp_0_value = read_max6675();
@@ -1583,11 +1596,12 @@ void Marlin_temperature_callback(int vector)
       break;
     case 3: // Measure TEMP_BED
       #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
-	  	 #ifdef USE_ARDUINO
-        raw_temp_bed_value += ADC;
-		 #else
-		  	raw_temp_bed_value += ADS1015_Read(1);
-		 #endif
+        #ifdef USE_ARDUINO
+          raw_temp_bed_value += ADC;
+        #else
+          raw_temp_bed_value += temp_1;
+          //raw_temp_bed_value += 1376;//ADS1015_Read(1);
+        #endif
       #endif
       temp_state = 4;
       break;
@@ -1653,7 +1667,7 @@ void Marlin_temperature_callback(int vector)
         raw_filwidth_value= raw_filwidth_value + ((unsigned long)ADC<<7);  //add new ADC reading 
         }
      #endif 
-     temp_state = 0;   
+     temp_state = 10;
       
      temp_count++;
      break;      
@@ -1667,7 +1681,7 @@ void Marlin_temperature_callback(int vector)
 //      SERIAL_ERRORLNPGM("Temp measurement error!");
 //      break;
   }
-    
+
   if(temp_count >= OVERSAMPLENR) // 10 * 16 * 1/(16000000/64/256)  = 164ms.
   {
     if (!temp_meas_ready) //Only update the raw values if they have been read. Else we could be updating them during reading.
@@ -1683,6 +1697,7 @@ void Marlin_temperature_callback(int vector)
       current_temperature_raw[2] = raw_temp_2_value;
 #endif
       current_temperature_bed_raw = raw_temp_bed_value;
+
     }
 
 //Add similar code for Filament Sensor - can be read any time since IIR filtering is used 
@@ -1698,6 +1713,7 @@ void Marlin_temperature_callback(int vector)
     raw_temp_2_value = 0;
     raw_temp_bed_value = 0;
 
+    //printf("current_temperature_raw=%d,maxttemp_raw=%d\n",current_temperature_raw[0],maxttemp_raw[0]);
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
     if(current_temperature_raw[0] <= maxttemp_raw[0]) {
 #else

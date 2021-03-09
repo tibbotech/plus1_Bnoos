@@ -29,7 +29,6 @@ unsigned long millis()
 	return (unsigned long)(AV1_GetStc32()/900);
 }
 
-#define MAX_DELAY_MS	(60)  // max delay is 67ms at once
 void delay(unsigned long ms)
 {
 	STC_delay_1ms(ms);

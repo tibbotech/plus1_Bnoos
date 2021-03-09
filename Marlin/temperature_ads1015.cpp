@@ -2,16 +2,14 @@
 #include "temperature_ads1015.h"
 #include "gpio_drv.h"
 #include "pins.h"
-
-
-
+#include "emuio.h"
 
 #define I2C_NUM		0  /* contain 4 I2C,from 0--3 */
 
 unsigned short ADS1015_CONFIG;//定义ADS1015配置变量
 
 
-#define GPIO_PIN_INIT(gpio_index)		GPIO_F_SET(gpio_index,1); \
+#define GPIO_PIN_INIT(gpio_index)		GPIO_F_SET(gpio_index,1);\
 										GPIO_M_SET(gpio_index,1);\
 										GPIO_E_SET(gpio_index,1);\
 										GPIO_O_SET(gpio_index,1)
@@ -27,7 +25,7 @@ unsigned short ADS1015_CONFIG;//定义ADS1015配置变量
 #define I2C_SDA_IN()					GPIO_E_SET(TEMP_I2C_SDA,0)
 #define I2C_SDA_OUT()					GPIO_E_SET(TEMP_I2C_SDA,1)
 
-#define Delay()							STC_delay_us(20)
+#define Delay()							STC_delay_us(15)
 
 void i2c_init(void)
 {
@@ -94,8 +92,6 @@ int i2c_read_ack(void)
 		I2C_SDA_OUT();
 	}
 
-	//if(cnt == 0)
-	//	printf("i2c slave no ack !!!\n");
 	return ret;
 }
 char i2c_read(void)
@@ -140,7 +136,11 @@ int i2c_write(unsigned int i2c_buff)
 	I2C_SCL_0();
 	Delay();
 
-	return i2c_read_ack();
+	int ret = i2c_read_ack();
+	if(ret)
+       printf("write data error !!\n");
+	return ret;
+
 }
 
 //ADS1015 read 2bytes data from reg
@@ -179,7 +179,7 @@ void ADS1015_WriteOneByte(unsigned char i2cAddress,unsigned short WriteAddr,unsi
 
 }
 
-
+extern float current_temperature[1] ;
 unsigned short ADS1015_Read(unsigned char channel)
 {
 int temp;
@@ -216,7 +216,7 @@ int temp;
 
 		temp=ADS1015_ReadOneByte(ADS1015_ADDRESS,ADS1015_REG_POINTER_CONVERT);
 		temp=temp>>4;
-		//printf("read data = %d ",temp);
+
 		return temp;
 	}
 return 0;
@@ -260,6 +260,7 @@ ADS1015_CONFIG  = ADS1015_REG_CONFIG_CQUE_NONE    | // Disable the comparator (d
 void ADS1015_Init()
 {
 	i2c_init();
+	printf("\n#####################################ADS1015    \n");
 	ADS1015_Config(ADS1015_ADDRESS,0);
 }
 

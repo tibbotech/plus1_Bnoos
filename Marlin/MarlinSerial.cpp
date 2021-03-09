@@ -32,7 +32,7 @@
   ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
 #endif
 
-FORCE_INLINE void store_char(unsigned char c)
+FORCE_INLINE int store_char(unsigned char c)
 {
   int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
@@ -43,7 +43,9 @@ FORCE_INLINE void store_char(unsigned char c)
   if (i != rx_buffer.tail) {
     rx_buffer.buffer[rx_buffer.head] = c;
     rx_buffer.head = i;
+    return 0;
   }
+  return -1;
 }
 
 
@@ -59,9 +61,19 @@ FORCE_INLINE void store_char(unsigned char c)
 #else
 void uart_isr(int vector)
 {
-	unsigned char c = UART_getc();
-	store_char(c);
-	UART_putc(c);
+	unsigned char c;
+	if (UART_REG->lsr & (UART_LSR_PE|UART_LSR_OE|UART_LSR_FE))
+	{
+
+		db_printf("%s LSR ERR, 0x%x\n", UART_REG->lsr);
+	}
+	while (UART_rx_rdy()) {
+		c = UART_getc();
+		UART_putc(c);
+		if(!store_char(c))
+			break;
+		UART_putc(c);
+	}
 }
 
 int uart_read(void)

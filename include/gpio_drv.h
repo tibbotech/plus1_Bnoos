@@ -256,11 +256,11 @@ extern u32 gpio_pin_mux_get(PMXSEL_ID id);
 						GPIO_E_SET(a,1);\
 						GPIO_O_SET(a,0)
 
-#define SET_OD_OUTPUT(a)	GPIO_F_SET(a,1);\
-							GPIO_M_SET(a,1);\
-							GPIO_OD_SET(a, 1);\
-							GPIO_O_INV_SET(a,1);\
-							GPIO_O_SET(a,0)
+#define SET_OD_OUTPUT(a)    GPIO_F_SET(a,1);    \
+						    GPIO_M_SET(a,1);    \
+                            GPIO_OD_SET(a,1);   \
+                            GPIO_O_INV_SET(a,1);\
+						    GPIO_O_SET(a,0)
 
 #define SET_INPUT(a)	GPIO_F_SET(a,1);\
 						GPIO_M_SET(a,1);\

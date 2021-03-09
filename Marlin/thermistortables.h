@@ -5,15 +5,10 @@
 
 #define OVERSAMPLENR 16
 
-//#define HEAT_MAX_TEMP	16383
-#define HEAT_MAX_TEMP	26080
-
-
 #if (THERMISTORHEATER_0 == 1) || (THERMISTORHEATER_1 == 1)  || (THERMISTORHEATER_2 == 1) || (THERMISTORBED == 1) //100k bed thermistor
 
-const short temptable_1[][2] PROGMEM = {
-
 #if 1
+const short temptable_1[][2] PROGMEM = {
 {       23*OVERSAMPLENR ,       300     },
 {       25*OVERSAMPLENR ,       295     },
 {       27*OVERSAMPLENR ,       290     },
@@ -68,16 +63,16 @@ const short temptable_1[][2] PROGMEM = {
 {       1483*OVERSAMPLENR        ,       45      },
 {       1510*OVERSAMPLENR        ,       40      },
 {       1531*OVERSAMPLENR        ,       35      },
-{       1553*OVERSAMPLENR        ,       30      },
+{       1533*OVERSAMPLENR        ,       30      },
 {       1570*OVERSAMPLENR        ,       25      },
 {       1578*OVERSAMPLENR        ,       20      },
 {       1586*OVERSAMPLENR        ,       15      },
 {       1593*OVERSAMPLENR        ,       10      },
 {       1610*OVERSAMPLENR       ,       5       },
 {       1630*OVERSAMPLENR       ,       0       } //safety
-
-
+};
 #else
+const short temptable_1[][2] PROGMEM = {
 {       23*OVERSAMPLENR ,       300     },
 {       25*OVERSAMPLENR ,       295     },
 {       27*OVERSAMPLENR ,       290     },
@@ -139,10 +134,14 @@ const short temptable_1[][2] PROGMEM = {
 {       999*OVERSAMPLENR        ,       10      },
 {       1004*OVERSAMPLENR       ,       5       },
 {       1008*OVERSAMPLENR       ,       0       } //safety
-#endif
-
 };
 #endif
+
+#endif
+
+
+
+
 #if (THERMISTORHEATER_0 == 2) || (THERMISTORHEATER_1 == 2) || (THERMISTORHEATER_2 == 2) || (THERMISTORBED == 2) //200k bed thermistor
 const short temptable_2[][2] PROGMEM = {
 //200k ATC Semitec 204GT-2
@@ -766,19 +765,19 @@ const short temptable_13[][2] PROGMEM = {
 /* The PT100 in the Ultimaker v2.0 electronics has a high sample value for a high temperature.
 This does not match the normal thermistor behaviour so we need to set the following defines */
 #if (THERMISTORHEATER_0 == 20)
-# define HEATER_0_RAW_HI_TEMP HEAT_MAX_TEMP
+# define HEATER_0_RAW_HI_TEMP 26080
 # define HEATER_0_RAW_LO_TEMP 0
 #endif
 #if (THERMISTORHEATER_1 == 20)
-# define HEATER_1_RAW_HI_TEMP HEAT_MAX_TEMP
+# define HEATER_1_RAW_HI_TEMP 26080
 # define HEATER_1_RAW_LO_TEMP 0
 #endif
 #if (THERMISTORHEATER_2 == 20)
-# define HEATER_2_RAW_HI_TEMP HEAT_MAX_TEMP
+# define HEATER_2_RAW_HI_TEMP 26080
 # define HEATER_2_RAW_LO_TEMP 0
 #endif
 #if (THERMISTORBED == 20)
-# define HEATER_BED_RAW_HI_TEMP HEAT_MAX_TEMP
+# define HEATER_BED_RAW_HI_TEMP 26080
 # define HEATER_BED_RAW_LO_TEMP 0
 #endif
 const short temptable_20[][2] PROGMEM = {
@@ -1182,9 +1181,9 @@ const short temptable_1047[][2] PROGMEM = {
 #ifndef HEATER_0_RAW_HI_TEMP
 # ifdef HEATER_0_USES_THERMISTOR   //In case of a thermistor the highest temperature results in the lowest ADC value
 #  define HEATER_0_RAW_HI_TEMP 0
-#  define HEATER_0_RAW_LO_TEMP HEAT_MAX_TEMP
+#  define HEATER_0_RAW_LO_TEMP 26080
 # else                          //In case of an thermocouple the highest temperature results in the highest ADC value
-#  define HEATER_0_RAW_HI_TEMP HEAT_MAX_TEMP
+#  define HEATER_0_RAW_HI_TEMP 26080
 #  define HEATER_0_RAW_LO_TEMP 0
 # endif
 #endif
@@ -1205,9 +1204,9 @@ const short temptable_1047[][2] PROGMEM = {
 #ifndef HEATER_1_RAW_HI_TEMP
 # ifdef HEATER_1_USES_THERMISTOR   //In case of a thermistor the highest temperature results in the lowest ADC value
 #  define HEATER_1_RAW_HI_TEMP 0
-#  define HEATER_1_RAW_LO_TEMP HEAT_MAX_TEMP
+#  define HEATER_1_RAW_LO_TEMP 26080
 # else                          //In case of an thermocouple the highest temperature results in the highest ADC value
-#  define HEATER_1_RAW_HI_TEMP HEAT_MAX_TEMP
+#  define HEATER_1_RAW_HI_TEMP 26080
 #  define HEATER_1_RAW_LO_TEMP 0
 # endif
 #endif
@@ -1228,9 +1227,9 @@ const short temptable_1047[][2] PROGMEM = {
 #ifndef HEATER_2_RAW_HI_TEMP
 # ifdef HEATER_2_USES_THERMISTOR   //In case of a thermistor the highest temperature results in the lowest ADC value
 #  define HEATER_2_RAW_HI_TEMP 0
-#  define HEATER_2_RAW_LO_TEMP HEAT_MAX_TEMP
+#  define HEATER_2_RAW_LO_TEMP 26080
 # else                          //In case of an thermocouple the highest temperature results in the highest ADC value
-#  define HEATER_2_RAW_HI_TEMP HEAT_MAX_TEMP
+#  define HEATER_2_RAW_HI_TEMP 26080
 #  define HEATER_2_RAW_LO_TEMP 0
 # endif
 #endif
@@ -1248,9 +1247,9 @@ const short temptable_1047[][2] PROGMEM = {
 #ifndef HEATER_BED_RAW_HI_TEMP
 # ifdef BED_USES_THERMISTOR   //In case of a thermistor the highest temperature results in the lowest ADC value
 #  define HEATER_BED_RAW_HI_TEMP 0
-#  define HEATER_BED_RAW_LO_TEMP HEAT_MAX_TEMP
+#  define HEATER_BED_RAW_LO_TEMP 26080
 # else                          //In case of an thermocouple the highest temperature results in the highest ADC value
-#  define HEATER_BED_RAW_HI_TEMP HEAT_MAX_TEMP
+#  define HEATER_BED_RAW_HI_TEMP 26080
 #  define HEATER_BED_RAW_LO_TEMP 0
 # endif
 #endif

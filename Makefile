@@ -13,7 +13,7 @@ LIB = lib
 TESTAPI = testapi
 
 #CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
-CROSS = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
+CROSS = ../../gcc-arm-9.2-2019.12-mingw-w64-i686-arm-none-eabi/bin/arm-none-eabi-
 ifneq ($(CROSS),)
 CC = $(CROSS)gcc
 CXX = $(CROSS)g++
@@ -30,7 +30,7 @@ LD_FILE = rom.ld
 LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
 #LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
-LDFLAGS_COM = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lstdc++ -lm -lc -lgcc
+LDFLAGS_COM = -L D:\SP7021\gcc-arm-9.2-2019.12-mingw-w64-i686-arm-none-eabi\lib\gcc\arm-none-eabi\9.2.1 -lstdc++ -lm -lc -lgcc
 
 CFLAGS += -MMD -O1
 CFLAGS += -nostdlib -fno-builtin
@@ -71,7 +71,7 @@ CSOURCES += Marlin/arduino/wiring_analog.c Marlin/arduino/wiring_digital.c Marli
 # Marlin
 CFLAGS += -fno-use-cxa-atexit -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -w
 CFLAGS += -IMarlin/include -IMarlin/arduino
-CFLAGS += -DF_CPU=16000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
+CFLAGS += -DF_CPU=202000000 -DARDUINO=105 -DMOTHERBOARD=33 -D__AVR_ATmega2560__ -DCPU_32_BIT
 CXXSOURCES += Marlin/motion_control.cpp Marlin/MarlinSerial.cpp Marlin/stepper.cpp Marlin/planner.cpp 
 CXXSOURCES += Marlin/temperature_ads1015.cpp Marlin/temperature.cpp
 CXXSOURCES += Marlin/ConfigurationStore.cpp Marlin/Marlin_main.cpp Marlin/arduino/main.cpp
@@ -132,7 +132,16 @@ DEPS = $(OBJS:.o=.d)
 
 .PHONY: clean all
 
-all: $(BIN)/$(SPI_ALL)
+all: $(BIN)/$(SPI_ALL) ISP
+#	dd if=bin/rom.img of=bin/kernel
+#	@cp bin/xboot.img xboot0
+#	@cp bin/u-boot.img uboot0
+#	@cp xboot0 xboot1
+#	@cp uboot0 uboot1
+#	@cp uboot0 uboot2
+#	@isp pack_image out/ISPBOOOT.BIN xboot0 uboot0 xboot1 0x100000 uboot1 0x300000 uboot2 0x300000 bin/kernel 0xf00000
+	@echo aaa
+	cp bin/rom.img u-boot.img
 
 $(BIN)/$(TARGET).bin: $(BIN)/$(TARGET)
 	$P $(OBJCOPY) -O binary -S $< $@
@@ -149,11 +158,23 @@ $(LD_FILE): $(LD_SRC)
 
 $(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin Makefile
 	$(Pecho) "  PACK $@"
-	$P bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
-	$P $(DD)64  if=prebuilt/xboot_nor.img
-	$P $(DD)256 if=$(BIN)/$(TARGET).img
-	$P ls -l $@
+#	$P bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
+	@mkimage -A arm -O linux -T quickboot -C none -a 0x200040 -e 0x200040 -n uboot_B -d $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img
+#	$P $(DD)64  if=prebuilt/xboot_nor.img
+#	$P $(DD)256 if=$(BIN)/$(TARGET).img
+#	dd  bs=1k of=$@ if=bin/bootRom.bin
+	dd  bs=1k of=$@ seek=64  if=bin/xboot.img
+	dd  bs=1k of=$@ seek=256 if=$(BIN)/$(TARGET).img
 
+#	$P ls -l $@
+pack:
+	@echo "Wrap code image..."
+	@mkimage -A arm -O linux -T quickboot -C none -a 0x200040 -e 0x200040 -n uboot -d $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img
+
+ISP:
+	@echo "isp..."
+	@rm -rf out
+	@mkdir out
 #testapi/qch/iop.o: testapi/qch/DQ8051.bin
 %.o: %.S
 	$(Pecho) "  CC   $<"
@@ -177,9 +198,9 @@ up:
 
 
 clean:
-	$P -rm -f $(OBJS) $(DEPS) rom.d >/dev/null
-	$P -cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
-	$P -rm -f $(LD_FILE) >/dev/null
+	$P -rm -f $(OBJS)
+#	$P -cd $(BIN); rm -f $(TARGET) $(TARGET).bin $(SPI_ALL) $(TARGET).map $(TARGET).dis $(TARGET).img >/dev/null
+#	$P -rm -f $(LD_FILE) >/dev/null
 
 
 p-%:
