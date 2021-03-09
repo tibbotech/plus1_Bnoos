@@ -64,7 +64,7 @@ if [ ! -f "$SRC" ];then
 	echo "Not found source image: $SRC"
 	exit 1
 fi
-
+echo  $MKIMAGE -A arm -O linux -T $TYPE -C none -a $LADDR -e $RADDR -n $NAME -d $SRC $OUTPUT
 $MKIMAGE -A arm -O linux -T $TYPE -C none -a $LADDR -e $RADDR -n $NAME -d $SRC $OUTPUT
 
 ls -l $OUTPUT

@@ -13,7 +13,7 @@ LIB = lib
 TESTAPI = testapi
 
 #CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
-CROSS = ../../gcc-arm-9.2-2019.12-mingw-w64-i686-arm-none-eabi/bin/arm-none-eabi-
+CROSS = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
 ifneq ($(CROSS),)
 CC = $(CROSS)gcc
 CXX = $(CROSS)g++
@@ -30,7 +30,7 @@ LD_FILE = rom.ld
 LD_SRC = script/rom.ldi
 LDFLAGS = -T $(LD_FILE)
 #LDFLAGS_COM  = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -lgcc
-LDFLAGS_COM = -L D:\SP7021\gcc-arm-9.2-2019.12-mingw-w64-i686-arm-none-eabi\lib\gcc\arm-none-eabi\9.2.1 -lstdc++ -lm -lc -lgcc
+LDFLAGS_COM = -L $(shell dirname `$(CC) -print-libgcc-file-name`) -L $(shell dirname `$(CC) -print-file-name=libc.a`) -lstdc++ -lm -lc -lgcc
 
 CFLAGS += -MMD -O1
 CFLAGS += -nostdlib -fno-builtin
@@ -158,8 +158,8 @@ $(LD_FILE): $(LD_SRC)
 
 $(BIN)/$(SPI_ALL): $(BIN)/$(TARGET).bin Makefile
 	$(Pecho) "  PACK $@"
-#	$P bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
-	@mkimage -A arm -O linux -T quickboot -C none -a 0x200040 -e 0x200040 -n uboot_B -d $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img
+	$P bash ./script/add_uhdr.sh uboot_B $< $(BIN)/$(TARGET).img 0x200040 0x200040
+#	@mkimage -A arm -O linux -T quickboot -C none -a 0x200040 -e 0x200040 -n uboot_B -d $(BIN)/$(TARGET).bin $(BIN)/$(TARGET).img
 #	$P $(DD)64  if=prebuilt/xboot_nor.img
 #	$P $(DD)256 if=$(BIN)/$(TARGET).img
 #	dd  bs=1k of=$@ if=bin/bootRom.bin
