@@ -1104,7 +1104,7 @@ void disable_heater()
   target_temperature[0]=0;
   soft_pwm[0]=0;
    #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1  
-     WRITE(HEATER_0_PIN,LOW);
+     WRITE(HEATER_0_PIN,0);
    #endif
   #endif
      

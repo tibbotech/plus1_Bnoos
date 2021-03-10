@@ -677,7 +677,7 @@ void loop()
   manage_inactivity();
   checkHitEndstops();
   lcd_update();
-  //get_temp();
+  get_temp();
 }
 
 void get_command()
@@ -2521,7 +2521,7 @@ Sigma_Exit:
       #endif //TEMP_RESIDENCY_TIME
           if( (millis() - codenum) > 1000UL )
           { //Print Temp Reading and remaining time every 1 second while heating up/cooling down
-            //get_temp();
+            get_temp();
             SERIAL_PROTOCOLPGM("T:");
             SERIAL_PROTOCOL_F(degHotend(tmp_extruder),1);
             SERIAL_PROTOCOLPGM(" E:");
@@ -2578,7 +2578,7 @@ Sigma_Exit:
 
         while ( (target_direction)&&(!cancel_heatup) ? (isHeatingBed()) : (isCoolingBed()&&(CooldownNoWait==false)) )
         {
-          //get_temp();
+          get_temp();
           if(( millis() - codenum) > 1000 ) //Print Temp Reading every 1 second while heating up.
           {
             float tt=degHotend(active_extruder);

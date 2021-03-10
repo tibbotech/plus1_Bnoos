@@ -305,7 +305,7 @@ FORCE_INLINE unsigned short calc_timer(unsigned short step_rate) {  //get timer 
 #else
   #define STEPPER_TIMER_RATE 2000000 // 2 Mhz
   timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
-  //if (timer<100) timer=100;
+  if (timer<100) timer=100;
 #endif
   return timer;
 }
@@ -741,7 +741,7 @@ void Marlin_stepper_callback(int vector)
         acc_step_rate = current_block->nominal_rate;
 
       // step_rate to timer interval
-      timer = calc_timer(acc_step_rate); //浼犲叆鍔犻�熼樁娈电殑閫熺巼
+      timer = calc_timer(acc_step_rate);
 
       OCR1A = timer;
       ENABLE_STEPPER_DRIVER_INTERRUPT();
