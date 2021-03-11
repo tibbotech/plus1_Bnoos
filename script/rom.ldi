@@ -6,7 +6,7 @@ ENTRY(_start)
 
 MEMORY
 {
-	public : ORIGIN = 0x200040, LENGTH = 32M
+	public : ORIGIN = 0x10040, LENGTH = 1M
 }
 
 /* Initial stack pointer value. */
@@ -60,6 +60,7 @@ SECTIONS
 		*(COMMON)
 		. = ALIGN(8);
 		__bss_end__ = .;
+		__bss_end = .;
 	} > public
 
 #else

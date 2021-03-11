@@ -79,8 +79,8 @@ static void ipc_copy(rpc_t *dst, rpc_t *src)
 		} else {
 			ipc_memcpy(dst->DATA, src->DATA, REG_ALIGN(len));
 		}
-	} 
-	else if (dst == &IPC_LOCAL->RPC) 
+	}
+	else if (dst == &IPC_LOCAL->RPC)
 	{
 		if (len > RPC_DATA_SIZE) {
 			dst->DATA_PTR = src->DATA_PTR;
@@ -96,7 +96,7 @@ static int ipc_write_enable(u32 mask)
 {
 	int ret = IPC_SUCCESS;
 	int _i = IPC_WRITE_TIMEOUT*10;
-	while (IPC_LOCAL->F_RW & (mask)) { 
+	while (IPC_LOCAL->F_RW & (mask)) {
 		STC_delay_us(100);
 		if (!_i--) {
 			printf("write IPC HW timeout! writeEnableReg = 0x%x \n",IPC_LOCAL->F_RW);
@@ -112,7 +112,7 @@ void printf_rpc(rpc_t *rpc)
 	int len,i=0;
 	len = rpc->DATA_LEN;
 	if (len > RPC_DATA_SIZE) {
-		printf("\n  data start from DATA_PRT = 0x%x\n",rpc->DATA_PTR);
+		printf("\n  data start from DATA_PRT = 0x%x\n",(u32)rpc->DATA_PTR);
 		while(i<len)
 		{
 			if(i%16 == 0)
@@ -128,7 +128,7 @@ void printf_rpc(rpc_t *rpc)
 				printf("\n");
 			printf("0x%x ",rpc->DATA[i++]);
 		}
-	}	
+	}
 }
 static int ipc_handle_data(void)
 {
@@ -141,8 +141,8 @@ static int ipc_handle_data(void)
 	} else {
 		printf_rpc(&ipc_data.rpc);
 		printf("\n  data len =%d, used DATA !!!\n",len);
-	}	
-	
+	}
+
 	return IPC_SUCCESS;
 }
 
@@ -154,7 +154,7 @@ int ipc_send_to_Achip(int cmd,char *data,int len)
 	{
 		printf("@data NULL!!\n");
 		return -1;
-	}	
+	}
 	memset(&ipc_data.rpc,0,sizeof(rpc_t));
 	ipc_data.rpc.F_DIR	 = RPC_REQUEST;
 	ipc_data.rpc.F_TYPE	 = REQ_WAIT_REP;
@@ -169,8 +169,8 @@ int ipc_send_to_Achip(int cmd,char *data,int len)
 	if (ret){
 		goto out;
 	}
-	
-	// fill data 
+
+	// fill data
 	if (len > RPC_DATA_SIZE) {
 		ipc_data.rpc.DATA_PTR = (void *)RPC_PTR_DATA_ADDR;
 		memset(ipc_data.rpc.DATA_PTR,0,RPC_PTR_DATA_MAXSIZE);
@@ -183,13 +183,13 @@ int ipc_send_to_Achip(int cmd,char *data,int len)
 
 	//trigger
 	IPC_LOCAL->TRIGGER = 1;
-	
+
 	//wait respone
 	ipc_data.g_respond = 0;
 	u32 t1 = AV1_GetStc32();
 	while((STC_get_timer(t1))<IPC_WRITE_TIMEOUT && !ipc_data.g_respond);
 	ret = (ipc_data.g_respond)?RET(ipc_data.rpc.CMD):IPC_FAIL_TIMEOUT;
-	
+
 	if(ipc_data.rpc.CMD == IPC_SUCCESS && rpc_check_seq(&ipc_data.rpc))
 	{
 		printf("\n	check data error \n");
@@ -207,7 +207,7 @@ void ipc_response_Achip(int cmd)
 	//send source data to A chip
 	int ret = IPC_SUCCESS;
 	rpc_t *src = &IPC_REMOTE->RPC;
-	
+
 	src->F_DIR	 = RPC_RESPONSE;
 	src->F_TYPE	 = REQ_DEFER_REP;
 	src->CMD 	 = cmd;
@@ -220,20 +220,20 @@ void ipc_response_Achip(int cmd)
 	}
 	// fill data
 	ipc_copy(&IPC_LOCAL->RPC,src);
-	
+
 	//  trigger int
 	IPC_LOCAL->TRIGGER = 1;
 	printf(" B responed to A \n");
 }
 
 
-void ipc_callback(void)
+void ipc_callback(int vector)
 {
 	rpc_t *src = &IPC_REMOTE->RPC;
 
 	memset(&ipc_data.rpc,0,sizeof(rpc_t));
 	ipc_copy(&ipc_data.rpc,&IPC_REMOTE->RPC);
-	
+
 	if(src->F_DIR == RPC_REQUEST){
 		ipc_response_Achip(IPC_SUCCESS); //Bchip response to Achip
 		ipc_handle_data();
