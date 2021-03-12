@@ -140,10 +140,19 @@ int main(void)
 #endif 
 
 #ifdef A_and_B_chip
+void uart2_init()
+{
+	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 0), (11 << 0));
+	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 8), (15 << 8));
+	MOON0_REG->reset[1] = RF_MASK_V_CLR(1 << 10); /* release UA1 */
+	UART2_REG->div_l = UART_BAUD_DIV_L(BAUDRATE, UART_SRC_CLK);
+	UART2_REG->div_h = UART_BAUD_DIV_H(BAUDRATE, UART_SRC_CLK);
+}
+
 void uart_isr_init(void)
 {
 	UART_REG->isc = (1 << 5); // RX interrupt enable
-	interrupt_register(53, "UART0", uart_isr, 1);
+	interrupt_register(55, "UART2", uart_isr, 1);
 }
 
 int main(void)
@@ -169,6 +178,7 @@ int main(void)
 
 	//timer_test_init();
 	//cbdma_test_init();
+	uart2_init();
 	uart_isr_init();
 
 #ifdef RS485_TEST
@@ -179,13 +189,6 @@ int main(void)
 
 	printf("NonOS boot OK!!!\n");
 	//task_dbg();
-
-    //UART1 init
-	gpio_pin_mux_sel(PMX_UA1_TX, 22-7);
-	gpio_pin_mux_sel(PMX_UA1_RX, 23-7);
-	UART1_REG->div_l = UART_BAUD_DIV_L(BAUDRATE, UART_SRC_CLK);
-	UART1_REG->div_h = UART_BAUD_DIV_H(BAUDRATE, UART_SRC_CLK);
-	MOON0_REG->reset[1] = RF_MASK_V_CLR(1 << 9);
 
 	Marlin_main();
 	while(1);

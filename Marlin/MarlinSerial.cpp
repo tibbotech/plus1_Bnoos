@@ -65,14 +65,14 @@ void uart_isr(int vector)
 	if (UART_REG->lsr & (UART_LSR_PE|UART_LSR_OE|UART_LSR_FE))
 	{
 
-		db_printf("%s LSR ERR, 0x%x\n", UART_REG->lsr);
+		//db_printf("%s LSR ERR, 0x%x\n", UART_REG->lsr);
 	}
 	while (UART_rx_rdy()) {
 		c = UART_getc();
-		UART_putc(c);
+		//UART_putc(c);
 		if(!store_char(c))
 			break;
-		UART_putc(c);
+		//UART_putc(c);
 	}
 }
 

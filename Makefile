@@ -13,15 +13,15 @@ LIB = lib
 TESTAPI = testapi
 
 #CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
-CROSS = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
-ifneq ($(CROSS),)
-CC = $(CROSS)gcc
-CXX = $(CROSS)g++
-LD = $(CROSS)ld
-CPP = $(CROSS)cpp
-OBJCOPY = $(CROSS)objcopy
-OBJDUMP = $(CROSS)objdump
-READELF = $(CROSS)readelf
+CROSS1 = ../../crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
+ifneq ($(CROSS1),)
+CC = $(CROSS1)gcc
+CXX = $(CROSS1)g++
+LD = $(CROSS1)ld
+CPP = $(CROSS1)cpp
+OBJCOPY = $(CROSS1)objcopy
+OBJDUMP = $(CROSS1)objdump
+READELF = $(CROSS1)readelf
 endif
 
 BIN = bin

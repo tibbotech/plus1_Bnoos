@@ -6,12 +6,12 @@ ENTRY(_start)
 
 MEMORY
 {
-	public : ORIGIN = 0x200040, LENGTH = 32M
+	public : ORIGIN = 0x10040, LENGTH = 1M
 }
 
 /* Initial stack pointer value. */
 EXTERN(__sp_init)
-PROVIDE(__sp_init = ORIGIN(public) + LENGTH(public));
+PROVIDE(__sp_init = 0 + LENGTH(public));
 
 SECTIONS
 {

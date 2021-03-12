@@ -37,7 +37,7 @@ EXTERN int psprintf(char *dest, const char *format, ...);
 #define UART_LSR_FE			(1<<4)
 
 // UART
-#define UART_REG            UART0_REG
+#define UART_REG            UART2_REG
 #define UART_tx_rdy()       (UART_REG->lsr & UART_LSR_TX_RDY)
 #define UART_rx_rdy()       (UART_REG->lsr & UART_LSR_RX_RDY)
 #define UART_tx_empty()     (UART_REG->lsr & UART_TX_EMPTY)
@@ -57,36 +57,7 @@ do { \
 	} \
 } while (0)
 
-static char uart1buf[300];
 
-#define db_printf(s...) \
-	do { psprintf(uart1buf, ## s); UART1_puts(uart1buf); } while (0)
-
-#define UART1_LSR_TX_RDY     (1 << 0)
-#define UART1_LSR_RX_RDY     (1 << 1)
-#define UART1_TX_EMPTY       (1 << 6)
-#define UART1_RTS_B			(1 << 1)
-
-	// UART
-//#define UART1_REG            UART1_REG
-#define UART1_tx_rdy()       (UART1_REG->lsr & UART1_LSR_TX_RDY)
-#define UART1_rx_rdy()       (UART1_REG->lsr & UART_LSR_RX_RDY)
-#define UART1_tx_empty()     (UART1_REG->lsr & UART_TX_EMPTY)
-#define UART1_putc_nw(c)     (UART1_REG->dr = (c))
-#define UART1_getc()         (UART1_REG->dr)
-
-#define UART1_wait()         do { while (!UART1_tx_rdy()) ;} while (0)
-#define UART1_flush()        do { while (!UART1_tx_empty()) ;} while (0)
-#define UART1_putc(c)        do { UART1_wait(); UART1_putc_nw(c); } while (0)
-#define UART1_putc_nl(c)     do { char _c=(c); UART1_putc(_c); if (_c == 0x0a) UART1_putc(0x0d);} while (0)
-#define UART1_puts(s) \
-	do { \
-		int __c; \
-		const char *__s = (const char *)(s); \
-		while ((__c = *__s++)) { \
-			UART1_putc_nl(__c); \
-		} \
-	} while (0)
 
 
 #define XTAL_CLK               (27 * 1000 * 1000)
