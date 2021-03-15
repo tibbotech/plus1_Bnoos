@@ -8,6 +8,7 @@ else
 endif
 DD = dd status=none bs=1k of=$@ seek=
 
+OLD_PINS=0
 COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
@@ -41,6 +42,11 @@ CFLAGS += -nodefaultlibs
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wall -march=armv5te -Wno-unused-function -Wno-unused-variable
 CFLAGS += -Iinclude -Iinclude/util -I$(TESTAPI)/qch -g
+#ifeq ($OLD_PINS,1)
+CFLAGS += -DOLD_PINS=1
+#else
+CFLAGS += -DOLD_PINS=0
+#endif
 
 #-mthumb -mthumb-interwork
 
