@@ -142,13 +142,10 @@ int main(void)
 #ifdef A_and_B_chip
 void uart2_init()
 {
-#if OLD_PINS
-	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 0), (11 << 0));
-	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 8), (15 << 8));
-#else
+
 	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 0), (18 << 0));
 	MOON3_REG->sft_cfg[16] = RF_MASK_V((0x7f << 8), (16 << 8));
-#endif
+
 	MOON0_REG->reset[1] = RF_MASK_V_CLR(1 << 10); /* release UA1 */
 	UART2_REG->div_l = UART_BAUD_DIV_L(BAUDRATE, UART_SRC_CLK);
 	UART2_REG->div_h = UART_BAUD_DIV_H(BAUDRATE, UART_SRC_CLK);
