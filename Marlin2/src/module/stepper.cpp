@@ -1889,7 +1889,7 @@ uint32_t Stepper::block_phase_isr() {
           // Using the old trapezoidal control
           step_rate = STEP_MULTIPLY(deceleration_time, current_block->acceleration_rate);
           if (step_rate < acc_step_rate) { // Still decelerating?
-            step_rate = acc_step_rate - step_rate;
+            step_rate = acc_step_rate - step_rate; // xtcomment: get the current rate in deceleration phase
             NOLESS(step_rate, current_block->final_rate);
           }
           else
@@ -1977,7 +1977,7 @@ uint32_t Stepper::block_phase_isr() {
       }
     }
   }
-
+//////////////////////////////////////xtmark
   // If there is no current block at this point, attempt to pop one from the buffer
   // and prepare its movement
   if (!current_block) {
@@ -2405,6 +2405,7 @@ void Stepper::init() {
       Y2_DIR_INIT();
     #endif
   #endif
+  
   #if HAS_Z_DIR
     Z_DIR_INIT();
     #if NUM_Z_STEPPER_DRIVERS >= 2 && HAS_Z2_DIR

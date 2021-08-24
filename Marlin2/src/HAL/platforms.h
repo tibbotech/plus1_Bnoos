@@ -47,6 +47,8 @@
   #define HAL_PATH(PATH, NAME) XSTR(PATH/LINUX/NAME)
 #elif defined(__SAMD51__)
   #define HAL_PATH(PATH, NAME) XSTR(PATH/SAMD51/NAME)
+#elif defined(__SP7021__)
+  #define HAL_PATH(PATH, NAME) XSTR(PATH/SP7021/NAME)
 #else
   #error "Unsupported Platform!"
 #endif

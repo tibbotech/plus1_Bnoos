@@ -381,6 +381,12 @@
 #define BOARD_AGCM4_RAMPS_144         6100  // RAMPS 1.4.4
 
 //
+// SP7021  cortext ARM9
+//
+
+#define BOARD_SUNPLUS_SP7021          7000
+
+//
 // Custom board
 //
 

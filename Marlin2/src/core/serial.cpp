@@ -33,8 +33,12 @@ static PGMSTR(echomagic, "echo:");
 #endif
 
 void serialprintPGM(PGM_P str) {
-  while (const char c = pgm_read_byte(str++)) SERIAL_CHAR(c);
+  while (const char c = pgm_read_byte(str++)) 
+  	{ 
+  		SERIAL_CHAR(c);
+  	}
 }
+
 void serial_echo_start()  { serialprintPGM(echomagic); }
 void serial_error_start() { serialprintPGM(errormagic); }
 
