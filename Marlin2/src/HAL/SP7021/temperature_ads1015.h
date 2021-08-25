@@ -97,6 +97,7 @@ GAIN_SIXTEEN      = ADS1015_REG_CONFIG_PGA_0_256V
 void ADS1015_Init();
 unsigned short ADS1015_Read(unsigned char channel);
 unsigned short ADS1015_Get_Data(unsigned char channel);
-
+void ADS1015_Patch_Set_FIQ();
+extern int32_t IRQ_SetPriority (IRQn_ID_t irqn, uint32_t priority);
 
 #endif

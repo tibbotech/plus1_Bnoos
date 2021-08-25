@@ -410,7 +410,11 @@ ADS1015_CONFIG2  = ADS1015_REG_CONFIG_CQUE_NONE    | // Disable the comparator (
 
 void ADS1015_Init()
 {
+
 	Wire.begin();
+
+	//Set i2c interrupt FIQ.
+	ADS1015_Patch_Set_FIQ();
 
 	ADS1015_Config(ADS1015_ADDRESS,0);
 }
@@ -453,6 +457,20 @@ unsigned short ADS1015_Get_Data(unsigned char channel)
 		return temp;
 	}
 	return 0;
+}
+
+/*
+ *	Set i2c interrupt FIQ.
+ *	I2C_MASTER0_IRQ = 174,	  I2C 0  interrupt
+ *	I2C_MASTER1_IRQ = 175,	  I2C 1  interrupt
+ *	I2C_MASTER2_IRQ = 176,	  I2C 2  interrupt
+ *	I2C_MASTER3_IRQ = 177,	  I2C 3  interrupt
+*/
+
+void ADS1015_Patch_Set_FIQ()
+{
+	int irqn = 174;
+	IRQ_SetPriority(irqn, 0);
 }
 
 #endif

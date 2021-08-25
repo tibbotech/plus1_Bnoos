@@ -51,6 +51,7 @@
 
 
 #define TEMP_TIMER_FREQUENCY 1000   // Temperature::isr() is expected to be called at around 1kHz
+#define ADS1015_TIMER_FREQUENCY 10	// ADS1015_Handler is expected to be called at around 10Hz
 
 // TODO: get rid of manual rate/prescale/ticks/cycles taken for procedures in stepper.cpp
 #define STEPPER_TIMER_RATE 2000000 // 2 Mhz
@@ -73,7 +74,8 @@ extern uint32_t GetStepperTimerClkFreq();
 extern void Step_Handler();
 extern void Temp_Handler();
 extern void ADS1015_Handler();
-
+extern int32_t IRQ_SetPriority (IRQn_ID_t irqn, uint32_t priority);
+void Stepper_Timer_Patch();
 
 #ifndef HAL_STEP_TIMER_ISR
   #define HAL_STEP_TIMER_ISR() void Step_Handler()

@@ -121,12 +121,12 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
 
 	  	timer_instance[timer_num]->setPrescaleFactor(20200);
 	  	timer_instance[timer_num]->setCount(frequency, HERTZ_FORMAT);
-		//timer_instance[timer_num]->setOverflow(frequency, HERTZ_FORMAT);
-
-		timer_instance[ADS1015_TIMER_NUM] = new HardwareTimer(ADS1015_TIMER_DEV);
-		timer_instance[ADS1015_TIMER_NUM]->setPrescaleFactor(20200);
-	  	timer_instance[ADS1015_TIMER_NUM]->setCount(frequency / 100, HERTZ_FORMAT);
         break;
+	  case ADS1015_TIMER_NUM:
+		timer_instance[timer_num] = new HardwareTimer(ADS1015_TIMER_DEV);
+		timer_instance[timer_num]->setPrescaleFactor(20200);
+		timer_instance[timer_num]->setCount(frequency, HERTZ_FORMAT);
+		break;
     }
 
     // Disable preload. Leaving it default-enabled can cause the timer to stop if it happens
@@ -136,7 +136,7 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
 
     HAL_timer_enable_interrupt(timer_num);
     // Start the timer.
-    //timer_instance[timer_num]->resume(); // First call to resume() MUST follow the attachInterrupt()
+    timer_instance[timer_num]->resume(); // First call to resume() MUST follow the attachInterrupt()
 
    }
 }
@@ -146,17 +146,17 @@ void HAL_timer_enable_interrupt(const uint8_t timer_num) {
     switch (timer_num) {
       case STEP_TIMER_NUM:
         timer_instance[timer_num]->attachInterrupt(Step_Handler);
-		timer_instance[timer_num]->resume();
+		Stepper_Timer_Patch();
         break;
       case TEMP_TIMER_NUM:
         timer_instance[timer_num]->attachInterrupt(Temp_Handler);
-		timer_instance[ADS1015_TIMER_NUM]->attachInterrupt(ADS1015_Handler);
-	  	timer_instance[timer_num]->resume();
-		timer_instance[ADS1015_TIMER_NUM]->resume();
         break;
+	  case ADS1015_TIMER_NUM:
+		timer_instance[timer_num]->attachInterrupt(ADS1015_Handler);
+		break;
     }
   }
-  
+
   //printf_a("freq = %d\n", timer_instance[timer_num]->getTimerClkFreq());
 }
 
@@ -168,8 +168,10 @@ void HAL_timer_disable_interrupt(const uint8_t timer_num) {
         break;
       case TEMP_TIMER_NUM:
         timer_instance[timer_num]->detachInterrupt();
-		timer_instance[ADS1015_TIMER_NUM]->detachInterrupt();
         break;
+	  case ADS1015_TIMER_NUM:
+		timer_instance[timer_num]->detachInterrupt();
+		break;
     }
   }
 }
@@ -271,5 +273,15 @@ static constexpr bool verify_no_timer_conflicts() {
 // If default_envs is defined properly in platformio.ini, VS Code can evaluate the array
 // when hovering over it, making it easy to identify the conflicting timers.
 static_assert(verify_no_timer_conflicts(), "One or more timer conflict detected. Examine \"timers_in_use\" to help identify conflict.");
+
+/*
+ *	Set stepper imer interrupt FIQ.
+ *  STC_AV0_TIMER2_IRQn 		   = 157,
+ */
+void Stepper_Timer_Patch()
+{
+	int irqn = 157;
+	IRQ_SetPriority(irqn, 0);
+}
 
 #endif 

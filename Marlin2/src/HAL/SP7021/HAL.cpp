@@ -69,7 +69,8 @@ void HAL_init() {
   #endif
 
     ADS1015_Init();
-
+	//ADS1015_TIMER_FREQUENCY = 10Hz. Get Data every 100ms from temperature sensor.
+	HAL_timer_start(ADS1015_TIMER_NUM, ADS1015_TIMER_FREQUENCY);
 }
 
 void HAL_clear_reset_source() 
