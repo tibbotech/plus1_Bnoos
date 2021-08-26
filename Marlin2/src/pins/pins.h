@@ -674,6 +674,12 @@
 #elif MB(LINUX_RAMPS)
   #include "linux/pins_RAMPS_LINUX.h"           // Linux                                  env:linux_native
 
+//
+// sunplus SP7021 board
+//
+#elif MB(SUNPLUS_SP7021)
+  #include "sp7021/pins_sp7021.h"               // sp7021                                  env:sp7021
+
 #else
 
   //
