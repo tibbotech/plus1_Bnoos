@@ -98,6 +98,7 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
     switch (timer_num) {
       case STEP_TIMER_NUM: // STEPPER TIMER - use a 32bit timer if possible
         timer_instance[timer_num] = new HardwareTimer(STEP_TIMER_DEV);
+		Stepper_Timer_Patch();
         /* Set the prescaler to the final desired value.
          * This will change the effective ISR callback frequency but when
          * HAL_timer_start(timer_num=0) is called in the core for the first time
@@ -136,7 +137,7 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
 
     HAL_timer_enable_interrupt(timer_num);
     // Start the timer.
-    timer_instance[timer_num]->resume(); // First call to resume() MUST follow the attachInterrupt()
+    //timer_instance[timer_num]->resume(); // First call to resume() MUST follow the attachInterrupt()
 
    }
 }
@@ -146,13 +147,15 @@ void HAL_timer_enable_interrupt(const uint8_t timer_num) {
     switch (timer_num) {
       case STEP_TIMER_NUM:
         timer_instance[timer_num]->attachInterrupt(Step_Handler);
-		Stepper_Timer_Patch();
+		timer_instance[timer_num]->resume();
         break;
       case TEMP_TIMER_NUM:
         timer_instance[timer_num]->attachInterrupt(Temp_Handler);
+		timer_instance[timer_num]->resume();
         break;
 	  case ADS1015_TIMER_NUM:
 		timer_instance[timer_num]->attachInterrupt(ADS1015_Handler);
+		timer_instance[timer_num]->resume();
 		break;
     }
   }
