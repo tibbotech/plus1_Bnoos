@@ -1,6 +1,5 @@
-ARDUINO_PATH = /home/xt.hu/code/nonos/arduino_core_sunplus/variants/sp7021_evb/
-
-FIRMWARE_TOP = /home/xt.hu/code/nonos/Bchip-non-os/Marlin2/
+FIRMWARE_TOP = $(shell pwd)/
+ARDUINO_PATH = $(FIRMWARE_TOP)../../arduino_core_sunplus/variants/sp7021_evb/
 MARLIN_DIR = $(FIRMWARE_TOP)src
 
 CCFLAGS += -DF_CPU=202000000L -DARDUINO_ARCH_SP7021 -DMOTHERBOARD=BOARD_SUNPLUS_SP7021 -D__SP7021__ -DARDUINO=10808 -DCPU_32_BIT
