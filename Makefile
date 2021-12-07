@@ -2,6 +2,7 @@ COMMON_DIR = common
 LIB = lib
 TESTAPI = testapi
 
+BOOT_NONOS_FROM_OPENAMP ?= 0
 #CROSS = ../../crossgcc/armv5-eabi--glibc--stable/bin/armv5-glibc-linux-
 ifneq ($(CROSS),)
 CC = $(CROSS)gcc
@@ -54,6 +55,9 @@ CSOURCES += $(TESTAPI)/interrupt/sp_interrupt.c
 ASOURCES += $(TESTAPI)/interrupt/vectors.S
 
 
+ifeq ($(BOOT_NONOS_FROM_OPENAMP),1)
+CFLAGS += -DBOOT_NONOS_FROM_OPENAMP
+endif
 
 #I2C_TEST = ENABLE
 ifeq "$(I2C_TEST)" "ENABLE"
@@ -110,7 +114,7 @@ OBJS = $(ASOURCES:.S=.o) $(CSOURCES:.c=.o)
 .PHONY: clean all
 
 all: clean $(BIN)/$(TARGET).bin
-	
+
 
 $(BIN)/$(TARGET).bin: $(LD_FILE) $(BIN)/$(TARGET).dis
 	@$(OBJCOPY) -O binary -S $(BIN)/$(TARGET) $@

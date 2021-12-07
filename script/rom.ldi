@@ -6,7 +6,11 @@ ENTRY(_start)
 
 MEMORY
 {
+#ifdef BOOT_NONOS_FROM_OPENAMP
+	public : ORIGIN = 0x1e000000, LENGTH = 1M
+#else
 	public : ORIGIN = 0x010040, LENGTH = 1M
+#endif
 }
 
 SECTIONS
