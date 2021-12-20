@@ -1,0 +1,65 @@
+Boot form OPENAMP and open VirtualIO in default.
+
+1.How to boot nonos:
+	make all
+
+  When you entry linux console, enter commands:
+
+	echo rom > /sys/class/remoteproc/remoteproc0/firmware 
+	echo start > /sys/class/remoteproc/remoteproc0/state 
+
+2.If you want to debug nonos by boot from xboot.
+  1)Set DEBUG_NONOS = 1 in Makefile (line. 10).
+
+  2)Use the HW UART(default UART2) in variant.h
+	#define SERIAL_UART_INSTANCE    2
+
+  3)put binary in romter, spi_all.bin in nonos/Bchip-non-os/bin
+
+
+3.if you want to use a device(defalut none of the device is in use)
+  1) set in variants/sp7021_evb/variant.h
+
+	/* select spi.(SPI0-SPI4) */
+	//#define SPI_SEL_INSTANCE      1
+	/* select i2c.(I2C0-I2C3) */
+	//#define I2C_SEL_INSTANCE      1
+
+  NOTE:if run linux and nonos at same time. please notice the conflict device.
+	Here offer the script check conflict device.
+	when you 'make nonos' in project root. Print info as follow:
+
+		xt.hu@cdoa16 ~/new_code> make nonos
+		make[1]: Entering directory '/home/xt.hu/new_code/nonos/Bchip-non-os'
+		[nonos check]info: no conflict dev. is OK!
+		make[1]: Leaving directory '/home/xt.hu/new_code/nonos/Bchip-non-os'
+
+	if confilct dev exist:
+
+		xt.hu@cdoa16 ~/new_code [SIGINT]> make nonos
+		make[1]: Entering directory '/home/xt.hu/new_code/nonos/Bchip-non-os'
+		--------------------------------------------------------------
+		[nonos check] WARNING: Devices that conflicts with Linux:
+		spi_controller1
+		Devices can't normally work.Please select other similar device
+		--------------------------------------------------------------
+		Makefile:141: recipe for target 'check' failed
+		make[1]: *** [check] Error 1
+		make[1]: Leaving directory '/home/xt.hu/new_code/nonos/Bchip-non-os'
+		build/Makefile:259: recipe for target 'nonos' failed
+		make: *** [nonos] Error 2
+
+  2) complie the example in Makefile
+
+     nonos/Bchip-non-os/Makefile(line. 110)
+	# Arduino C++ Example
+	#DIRS += $(TOPDIR)/libraries/exampples
+	#DIRS += $(TOPDIR)/libraries/examples/timer
+	#DIRS += $(TOPDIR)/libraries/examples/i2c
+	#DIRS += $(TOPDIR)/libraries/examples/exti
+	#DIRS += $(TOPDIR)/libraries/examples/VirtIOSerial
+	DIRS += $(TOPDIR)/libraries/examples/uart
+
+     example file refer to:
+	libraries/examples
+
