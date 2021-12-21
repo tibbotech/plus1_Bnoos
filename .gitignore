@@ -1,5 +1,8 @@
 *~
 *.bak
 *.o
+*.d
 *.ld
+*.bin
+*.dis
 

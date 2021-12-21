@@ -78,7 +78,7 @@ static inline void *hal_memcpy(void *dest, const void *src, size_t n)
 void SystemInit (void)
 {
 	/*system  init*/
-#if 1
+#if 0
 	L1C_DisableCaches();
 	__set_TLBIALL(0);
   	__set_ICIALLU(0);

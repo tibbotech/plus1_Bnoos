@@ -7,7 +7,7 @@ else
  P=
 endif
 #set DEBUG_NONOS = y , xboot jump to nonos instead of uboot.
-DEBUG_NONOS = 1
+DEBUG_NONOS = 0
 BOOT_NONOS_FROM_OPENAMP ?= 0
 
 DD = dd status=none bs=1k of=$@ seek=
@@ -108,12 +108,12 @@ DIRS += $(TOPDIR)/cores/arduino/sunplus/OpenAMP/open-amp/virtio
 DIRS += $(TOPDIR)/system/Middlewares/OpenAMP/virt_driver
 
 # Arduino C++ Example
-#DIRS += $(TOPDIR)/libraries/examples
+DIRS += $(TOPDIR)/libraries/examples
 #DIRS += $(TOPDIR)/libraries/examples/timer
 #DIRS += $(TOPDIR)/libraries/examples/i2c
 #DIRS += $(TOPDIR)/libraries/examples/exti
 #DIRS += $(TOPDIR)/libraries/examples/VirtIOSerial
-DIRS += $(TOPDIR)/libraries/examples/uart
+#DIRS += $(TOPDIR)/libraries/examples/uart
 
 CSOURCES += $(wildcard $(patsubst %,%/*.c, $(DIRS) ))
 CXXSOURCES += $(wildcard $(patsubst %,%/*.cpp, $(DIRS) ))
@@ -152,7 +152,7 @@ $(TARGET): $(OBJS) $(LD_FILE)
 	$P $(LD) $(OBJS) -o $(TARGET) -Map $(TARGET).map $(LDFLAGS) $(LDFLAGS_COM)
 	$P $(SIZE) -B $(TARGET)
 
-$(LD_FILE): $(LD_SRC)
+$(LD_FILE): $(LD_SRC) Makefile
 	$P $(CPP) -P $(CFLAGS) $(CCFLAGS) -x c $< -o $@
 
 $(SPI_ALL): $(TARGET).bin Makefile

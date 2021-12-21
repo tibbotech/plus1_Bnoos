@@ -13,8 +13,8 @@
 /* select ext_int.(EXT_INT0--EXT_INT7) */
 //#define EXT_INT_SEL_INSTANCE	0
 
-#define PIN_SERIAL_TX	GPIO_P1_01
-#define PIN_SERIAL_RX	GPIO_P1_00
+#define PIN_SERIAL_TX	GPIO_P1_07
+#define PIN_SERIAL_RX	GPIO_P1_06
 
 #define PIN_SPI_MISO	GPIO_P8_07
 #define PIN_SPI_MOSI	GPIO_P8_07

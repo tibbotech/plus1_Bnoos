@@ -4,7 +4,8 @@
  * Test the high-level and edge-rising.
  * pin set:
  * 		output: GPIO simulates PWM waves	GPIO_P4_06(evb 38)
- * 			input : Externel interrupt0			GPIO_P4_07(evb 39)
+ * 		input : Externel interrupt0			GPIO_P4_07(evb 39)
+ * Connect the PWM pin and Externel interrupt0 pin.
  * 		expected result:
  * 			HIGH: 	print every 3 seconds.
  * 			RISING: print every 6 seconds.
