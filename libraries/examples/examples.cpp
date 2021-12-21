@@ -1,6 +1,11 @@
 #include "Arduino.h"
 #include "HardwareSerial.h"
 
+/*
+ * This example only show the most basic usage of print.
+ * If you want to test more, you can refer to other examples
+ * in libraries/examples.
+ */
 void setup()
 {
 	printf("Build @%s, %s\n", __DATE__, __TIME__);//UART0 print
