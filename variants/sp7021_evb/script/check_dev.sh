@@ -2,6 +2,7 @@
 
 TOPDIR=$1
 OUT_PATH=${TOPDIR}/bin
+mkdir -p ${OUT_PATH}
 #####################################generate the arm926 dev list
 ARM926_LIST=${OUT_PATH}/arm926_list
 
