@@ -215,33 +215,8 @@ spi_status_e spi_transfer(spi_t *obj, uint8_t *tx_buffer, uint8_t *rx_buffer,
     return Timeout > 0U ? SPI_ERROR : SPI_TIMEOUT;
   }
 
-  return HAL_SPI_TransmitReceive(&obj->handle,tx_buffer,rx_buffer,len,1,Timeout);
+  return HAL_SPI_TransmitReceive(&obj->handle,tx_buffer,rx_buffer,len,len,Timeout);
 
-#if 0
-  tickstart = HAL_GetTick();
-
-  /* spi config set */
-  LL_SPI_Config_Set(_SPI,obj->handle.Init.spiclk,obj->handle.Init.spi_mode,obj->handle.Init.FirstBit);
-
-  /* Start transfer */
-  LL_SPI_SetTransferSize(_SPI, size);
-  LL_SPI_StartMasterTransfer(_SPI);
-
-  while (size--) {
-    while (!LL_SPI_IsActiveFlag_TXE(_SPI));
-    LL_SPI_TransmitData8(_SPI, *tx_buffer++);
-
-    if (!skipReceive) {
-      while (!LL_SPI_IsActiveFlag_RXNE(_SPI));
-      *rx_buffer++ = LL_SPI_ReceiveData8(_SPI);
-    }
-    if ((Timeout != HAL_MAX_DELAY) && (HAL_GetTick() - tickstart >= Timeout)) {
-      ret = SPI_TIMEOUT;
-      break;
-    }
-  }
-  return ret;
- #endif 
 }
 
 #ifdef __cplusplus

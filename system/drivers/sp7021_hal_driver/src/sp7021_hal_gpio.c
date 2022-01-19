@@ -445,3 +445,12 @@ int HAL_GPIO_Get_Mode(uint16_t GPIO_Pin)
 	*/
 	return gpio_out_val_get(GPIO_Pin);
 }
+
+void HAL_GPIO_Pinmux_Set(uint16_t GPIO_Pin,int isGpio)
+{
+	gpio_assert_param(IS_GPIO_PIN(GPIO_Pin));
+	if(isGpio)
+		gpio_first_val_set(GPIO_Pin,1); /* config pin to gpio mode */
+	else
+		gpio_first_val_set(GPIO_Pin,0); /* config pin to pinmux mode */
+}

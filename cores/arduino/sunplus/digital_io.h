@@ -58,6 +58,9 @@ static inline void digitalModeSet(uint32_t ulPin, uint32_t ulMode)
       case OUTPUT_OPEN_DRAIN:
         GPIO_Init.opendrain = GPIO_OD_ENABLE;
         break;
+      case PINMUX_MODE:
+	HAL_GPIO_Pinmux_Set(ulPin,0);   /* set pin to pinmux mode */
+	return;
       default:
         return;
     }
@@ -70,7 +73,6 @@ static inline int digitalModeGet(uint32_t ulPin)
 {
   return HAL_GPIO_Get_Mode(ulPin);
 }
-
 
 #ifdef __cplusplus
 }

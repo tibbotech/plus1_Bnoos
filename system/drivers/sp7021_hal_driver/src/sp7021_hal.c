@@ -52,7 +52,7 @@ void HAL_IncTick(void)
 __weak void HAL_Delay(uint32_t Delay)
 {
 	uint32_t tickstart = HAL_GetTick();
-	uint32_t wait = Delay;
+	uint32_t wait = 0;
 
 	if (wait < HAL_MAX_DELAY)
 	{

@@ -1,5 +1,8 @@
 #include "sp7021_hal_pwm.h"
 
+
+//#define PWM_DEBUG    /* enable pwm debug  log */
+
 #ifdef PWM_DEBUG
 #define pwm_printf	printf
 #else
@@ -175,4 +178,9 @@ void HAL_PWM_DISABLE(int pwm_num)
 
 	PWM_CTRL_REG->pwm_bypass &= ~(1<<pwm_num);	//bypass disable
 	PWM_CTRL_REG->pwm_en &= ~(1<<pwm_num); 		//  pwm  disable
+}
+
+void HAL_PWM_Period_Set(int pwm_num,uint32_t freq,uint32_t duty_cycle)
+{
+	__PWM_Set_by_period(pwm_num,freq,duty_cycle);
 }

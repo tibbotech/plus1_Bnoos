@@ -43,14 +43,15 @@
 #endif // __cplusplus
 
 /* Official Arduino */
-#define INPUT         0x0
+#define INPUT         	    0x0
 #define OUTPUT              0x1
 #define INPUT_PULLUP        0x2
-/* STM32 extension */
+/*  extension */
 #define INPUT_FLOATING      INPUT
 #define INPUT_PULLDOWN      0x3
 #define INPUT_ANALOG        0x4
 #define OUTPUT_OPEN_DRAIN   0x5
+#define PINMUX_MODE	    0x6
 
 #define PI 3.1415926535897932384626433832795
 #define HALF_PI 1.5707963267948966192313216916398

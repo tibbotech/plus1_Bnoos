@@ -44,7 +44,6 @@ typedef struct
 }PWM_InitTypeDef;
 
 
-#define PWM_DEBUG    /* enable pwm debug  log */
 
 #define IS_PWM_NUM_VALID(num)  (((num) >= PWM0) && ((num) <= PWM7))
 #define IS_PWM_DUTY_VALID(duty)  (((duty) >= 1) && ((duty) <= 99))
@@ -55,6 +54,7 @@ typedef struct
 int HAL_PWM_INIT(PWM_InitTypeDef *PWM_Init);
 void HAL_PWM_ENABLE(int pwm_num);
 void HAL_PWM_DISABLE(int pwm_num);
+void HAL_PWM_Period_Set(int pwm_num,uint32_t freq,uint32_t duty_cycle);
 
 #ifdef __cplusplus
 }
