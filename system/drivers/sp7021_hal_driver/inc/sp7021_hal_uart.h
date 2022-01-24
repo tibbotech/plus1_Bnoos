@@ -223,7 +223,6 @@ typedef struct
 
 #define IS_UART_ONE_OF_TWO_STATUS(__STATUS__)  				(((__STATUS__) == 0) || ((__STATUS__) == 1))
 
-#define uart_assert_param(expr)   ((expr) ? (void)0 : (printf("[ERROR]: file %s on line %d\r\n",__FUNCTION__, __LINE__)))
 
 #define UART_DMA_ALIGN_SIZE		32
 

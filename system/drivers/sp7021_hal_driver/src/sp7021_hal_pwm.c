@@ -1,6 +1,5 @@
 #include "sp7021_hal_pwm.h"
 
-
 //#define PWM_DEBUG    /* enable pwm debug  log */
 
 #ifdef PWM_DEBUG
@@ -144,10 +143,10 @@ static int __PWM_Set_by_period(int pwm_num,uint32_t freq,uint32_t duty_cycle)
 int HAL_PWM_INIT(PWM_InitTypeDef *PWM_Init)
 {
 
-	pwm_assert_param(PWM_Init);
-	pwm_assert_param(PWM_Init->pwm_freq);
-	pwm_assert_param(IS_PWM_NUM_VALID(PWM_Init->pwm_num));
-	pwm_assert_param(IS_PWM_DUTY_VALID(PWM_Init->duty_cycle));
+	assert_param(PWM_Init);
+	assert_param(PWM_Init->pwm_freq);
+	assert_param(IS_PWM_NUM_VALID(PWM_Init->pwm_num));
+	assert_param(IS_PWM_DUTY_VALID(PWM_Init->duty_cycle));
 	
 	PWM_Init->Pin = GPIO_TO_PINMUX(PWM_Init->Pin);
 	if(IS_VALID_PINMUX(PWM_Init->Pin) == 0)
@@ -166,7 +165,7 @@ int HAL_PWM_INIT(PWM_InitTypeDef *PWM_Init)
 
 void HAL_PWM_ENABLE(int pwm_num)
 {
-	pwm_assert_param(IS_PWM_NUM_VALID(pwm_num));
+	assert_param(IS_PWM_NUM_VALID(pwm_num));
 
 	PWM_CTRL_REG->pwm_bypass &= ~(1<<pwm_num); //bypass disable
 	PWM_CTRL_REG->pwm_en |= 1<<pwm_num; 	   // set pwm enable
@@ -174,7 +173,7 @@ void HAL_PWM_ENABLE(int pwm_num)
 
 void HAL_PWM_DISABLE(int pwm_num)
 {
-	pwm_assert_param(IS_PWM_NUM_VALID(pwm_num));
+	assert_param(IS_PWM_NUM_VALID(pwm_num));
 
 	PWM_CTRL_REG->pwm_bypass &= ~(1<<pwm_num);	//bypass disable
 	PWM_CTRL_REG->pwm_en &= ~(1<<pwm_num); 		//  pwm  disable

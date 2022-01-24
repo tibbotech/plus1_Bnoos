@@ -58,7 +58,7 @@ static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef *huart, 
 
 static void __uart_lcr_config(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart);
+	assert_param(huart);
 
 	if(IS_UART_LCR_VOTE_SELECT(huart->Init.LcrInit.vote_select))
 	{
@@ -171,7 +171,7 @@ static inline void __stop_rx_irq(UART_HandleTypeDef *huart)
 static inline void __start_rx_irq(UART_HandleTypeDef *huart)
 {
 	unsigned int isc = 0;
-	isc = SP_UART_ISC_RXM;
+	isc = READ_REG(huart->Instance->isc) | SP_UART_ISC_RXM;
 	WRITE_REG(huart->Instance->isc, isc);
 }
 
@@ -186,12 +186,14 @@ static void __uart_tx_irq_handler(UART_HandleTypeDef *huart)
 	UART_TxGdma *txgdma_reg;
 	
 	if(huart->gState != HAL_UART_STATE_BUSY_TX)
+	{
 		return;
+	}
 	
 	/*  transmit data by uart register */
 	if(huart->pTxBuffPtr)
 	{	
-		if (huart->pTxBuffPtr[huart->tx_index] && huart->tx_size > huart->tx_index) 
+		while(huart->pTxBuffPtr[huart->tx_index] && (huart->tx_size > huart->tx_index))
 		{
 			WRITE_REG(huart->Instance->dr,huart->pTxBuffPtr[huart->tx_index]);
 			huart->tx_index++;
@@ -201,22 +203,15 @@ static void __uart_tx_irq_handler(UART_HandleTypeDef *huart)
 				__stop_tx_irq(huart);
 				huart->gState = HAL_UART_STATE_READY;
 				huart->TxCpltCallback(huart);
+				break;
 			}
-		}
-		else
-		{
-			huart->tx_index = 0;
-			__stop_tx_irq(huart);
-			huart->gState = HAL_UART_STATE_READY;
-			huart->TxCpltCallback(huart);
-			return;	
 		}
 		return;
 	}
 
 	/*  transmit data by dma register */
-	uart_assert_param(huart->txdma);
-	uart_assert_param(huart->txgdma);
+	assert_param(huart->txdma);
+	assert_param(huart->txgdma);
 	
 	txdma_reg = huart->txdma;
 	txgdma_reg = huart->txgdma;
@@ -267,7 +262,7 @@ static void __uart_tx_irq_handler(UART_HandleTypeDef *huart)
 
 static void __uart_rx_irq_handler(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart->pRxBuffPtr);
+	assert_param(huart->pRxBuffPtr);
 	
 	if(huart->RxState != HAL_UART_STATE_BUSY_RX)
 		return;
@@ -308,10 +303,10 @@ static void __uart_rx_irq_handler(UART_HandleTypeDef *huart)
 
 static void __uart_txdma_config(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart);
-	uart_assert_param(huart->txdma);
-	uart_assert_param(huart->txgdma);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->txdma);
+	assert_param(huart->txgdma);
+	assert_param(huart->Instance);
 
 	UART_Txdma *txdma_reg = huart->txdma;
 	UART_TxGdma *txgdma_reg = huart->txgdma;
@@ -355,9 +350,9 @@ static void __uart_rxdma_config(UART_HandleTypeDef *huart)
 {
 	uint8_t ch;
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->rxdma);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->rxdma);
+	assert_param(huart->Instance);
 
 	UART_Rxdma *rxdma_reg = huart->rxdma;
 
@@ -410,7 +405,7 @@ static void __uart_rxdma_config(UART_HandleTypeDef *huart)
 
 int HAL_UART_Get_TX_FIFO_Space(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart);
+	assert_param(huart);
 	return (READ_REG(huart->Instance->txr)&0x3f);
 }
 
@@ -483,11 +478,11 @@ void HAL_UART_Rxdma_IRQ_Handler(UART_HandleTypeDef *huart)
 
 void HAL_UART_IRQHandler(void *arg)
 {
-	uart_assert_param(arg);
+	assert_param(arg);
 
 	UART_HandleTypeDef *huart = (UART_HandleTypeDef *)arg;
 
-	uart_assert_param(huart->Instance);
+	assert_param(huart->Instance);
 
 	unsigned int isc_temp = huart->Instance->isc;
 
@@ -495,7 +490,6 @@ void HAL_UART_IRQHandler(void *arg)
 	{
 		__uart_rx_irq_handler(huart);
 	}
-
 	if(isc_temp & SP_UART_ISC_TX)
 	{
 		__uart_tx_irq_handler(huart);
@@ -506,10 +500,10 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pDat
 {
 	int c = 0;
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->txdma);
-	uart_assert_param(huart->txgdma);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->txdma);
+	assert_param(huart->txgdma);
+	assert_param(huart->Instance);
 
 	if (huart->gState == HAL_UART_STATE_READY)
 	{
@@ -563,9 +557,9 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pDat
 HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
 {
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->rxdma);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->rxdma);
+	assert_param(huart->Instance);
 
 	if (huart->RxState == HAL_UART_STATE_READY)
 	{
@@ -598,14 +592,13 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData
 
 HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
 {
-	uart_assert_param(huart);
+	assert_param(huart);
 	if (huart->gState == HAL_UART_STATE_READY)
 	{
-		if ((pData == NULL) || (Size == 0U))
+		if ((pData == NULL) || (Size <= 0U))
 	    {
 	      return  HAL_ERROR;
 	    }
-
 	   /* Init tickstart for timeout managment*/
 	    __HAL_LOCK(huart);
 	    huart->gState = HAL_UART_STATE_BUSY_TX;
@@ -613,9 +606,7 @@ HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, uint8_t *pData
 	    huart->tx_size = Size;
 	    huart->tx_index = 0;
 		__start_tx_irq(huart);
-
 	    __HAL_UNLOCK(huart);
-
 
 	    return HAL_OK;
 	}
@@ -627,7 +618,7 @@ HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef *huart, uint8_t *pData
 
 HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
 {
-	uart_assert_param(huart);
+	assert_param(huart);
 
 	if (huart->RxState == HAL_UART_STATE_READY)
 	{
@@ -662,9 +653,8 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, u
 	uint8_t  *pdata8bits;
 	uint32_t tickstart;
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->Instance);
-
+	assert_param(huart);
+	assert_param(huart->Instance);
 	if (huart->gState == HAL_UART_STATE_READY)
 	{
 		if ((pData == NULL) || (Size == 0U))
@@ -711,8 +701,8 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, ui
 	uint8_t  *pdata8bits;
 	uint32_t tickstart;
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->Instance);
 
 
 	if (huart->RxState == HAL_UART_STATE_READY)
@@ -764,8 +754,8 @@ HAL_StatusTypeDef HAL_UART_AbortReceive(UART_HandleTypeDef *huart)
 {
 	uint8_t ch;
 
-	uart_assert_param(huart);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->Instance);
 
 	__HAL_LOCK(huart);
 
@@ -785,7 +775,7 @@ HAL_StatusTypeDef HAL_UART_AbortReceive(UART_HandleTypeDef *huart)
 
 HAL_StatusTypeDef HAL_UART_AbortTransmit(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart);
+	assert_param(huart);
 
 	__HAL_LOCK(huart);
 
@@ -802,8 +792,8 @@ HAL_StatusTypeDef HAL_UART_AbortTransmit(UART_HandleTypeDef *huart)
 
 HAL_StatusTypeDef HAL_UART_Abort(UART_HandleTypeDef *huart)
 {
-	uart_assert_param(huart);
-	uart_assert_param(huart->Instance);
+	assert_param(huart);
+	assert_param(huart->Instance);
 
 	UART_Rxdma *rxdma_reg = huart->rxdma;
 	uint8_t ch;
@@ -837,7 +827,6 @@ uint32_t HAL_UART_GetState(UART_HandleTypeDef *huart)
   uint32_t temp2;
   temp1 = huart->gState;
   temp2 = huart->RxState;
-
   return (uint32_t)(temp1 | temp2);
 }
 
@@ -866,7 +855,7 @@ HAL_StatusTypeDef HAL_UART_Config_DMA_Buf(uint32_t* dma_start_addr)
 HAL_StatusTypeDef HAL_UART_Init(UART_HandleTypeDef *huart)
 {
 
-	uart_assert_param(IS_UART_INSTANCE(huart->Instance));
+	assert_param(IS_UART_INSTANCE(huart->Instance));
 	
 	/* step 1: config pinmux */
 	if(huart->Instance == SP_UART0)
@@ -925,8 +914,8 @@ HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef *huart)
   }
 
   /* Check the parameters */
-  uart_assert_param(huart->Instance);
-  uart_assert_param(IS_UART_INSTANCE(huart->Instance));
+  assert_param(huart->Instance);
+  assert_param(IS_UART_INSTANCE(huart->Instance));
 
   if(huart->txdma_buf == g_dma_buffer[0].tx_buffer)
   {

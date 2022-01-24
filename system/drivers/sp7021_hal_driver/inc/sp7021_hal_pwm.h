@@ -9,6 +9,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "sp7021_hal_def.h"
 #include "sp7021_arm926.h"
+#include "sp70xx.h"
 
 typedef enum {
 	PWM0=0,
@@ -47,9 +48,6 @@ typedef struct
 
 #define IS_PWM_NUM_VALID(num)  (((num) >= PWM0) && ((num) <= PWM7))
 #define IS_PWM_DUTY_VALID(duty)  (((duty) >= 1) && ((duty) <= 99))
-
-#define pwm_assert_param(expr)   ((expr) ? (void)0 : (printf("[ERROR]: file %s on line %d\r\n",__FUNCTION__, __LINE__)))
-
 
 int HAL_PWM_INIT(PWM_InitTypeDef *PWM_Init);
 void HAL_PWM_ENABLE(int pwm_num);
