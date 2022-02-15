@@ -8,15 +8,16 @@
  */
 void setup()
 {
-	printf("Build @%s, %s\n", __DATE__, __TIME__);//UART0 print
+	printf("####### [B-nonos] Build @%s, %s ####### \n\n", __DATE__, __TIME__);//UART0 print
 
+#if 0
 	/* UART2 print */
 	Serial2.begin(115200);//UART2 init
 	Serial2.print("Build @");
 	Serial2.println(__DATE__);
 	Serial2.println(__TIME__);
 	Serial2.print("Nonos boot ok!\n");
-
+#endif
 	printf("Nonos boot ok!\n");//UART0 print
 }
 

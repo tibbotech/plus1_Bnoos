@@ -1,5 +1,5 @@
 //void SystemClock_Config(void);
-#define SERIAL_UART_INSTANCE	2
+//#define SERIAL_UART_INSTANCE	2
 
 /* select spi.(SPI0-SPI4) */
 //#define SPI_SEL_INSTANCE	1
