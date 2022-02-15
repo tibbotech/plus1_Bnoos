@@ -75,16 +75,16 @@ class HardwareSerial : public Stream {
 
 };
 
-#if defined(HAVE_HWSERIAL1)
+#if defined(UART1_BASE)
   extern HardwareSerial Serial1;
 #endif
-#if defined(HAVE_HWSERIAL2)
+#if defined(UART2_BASE)
   extern HardwareSerial Serial2;
 #endif
-#if defined(HAVE_HWSERIAL3)
+#if defined(UART3_BASE)
   extern HardwareSerial Serial3;
 #endif
-#if defined(HAVE_HWSERIAL4)
+#if defined(UART4_BASE)
   extern HardwareSerial Serial4;
 #endif
 
