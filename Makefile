@@ -8,7 +8,6 @@ else
 endif
 #set DEBUG_NONOS = y , xboot jump to nonos instead of uboot.
 DEBUG_NONOS = 0
-BOOT_NONOS_FROM_OPENAMP ?= 0
 
 DD = dd status=none bs=1k of=$@ seek=
 
@@ -42,9 +41,7 @@ CCFLAGS += -DDEFAULT_LOGGER_ON -DMETAL_INTERNAL
 # virt_uart
 CCFLAGS += -DVIRTIOCON -DENABLE_SERIALVIRTIO 
 CCFLAGS += -DSP7021
-ifeq ($(BOOT_NONOS_FROM_OPENAMP),1)
-CCFLAGS += -DBOOT_NONOS_FROM_OPENAMP
-endif
+
 ifeq ($(DEBUG_NONOS),1)
 CCFLAGS += -DDEBUG_XBOOT_TO_NONOS
 endif
