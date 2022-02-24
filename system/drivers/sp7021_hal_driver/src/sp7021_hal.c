@@ -23,7 +23,7 @@ STC_HandleTypeDef SysStandardTimeClk;
 
 HAL_StatusTypeDef HAL_Init(void)
 {
-	HAL_InitTick(STC0);
+	HAL_InitTick(INIT_STC);
 }
 
 HAL_StatusTypeDef HAL_DeInit(void)

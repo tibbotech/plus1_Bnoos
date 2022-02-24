@@ -97,14 +97,14 @@ sed -n 's/^2 \(.*\)$/\1/p' ${TEMP} > ${CONFLICT_DEV_LIST}
 
 if [ -s ${CONFLICT_DEV_LIST} ]; then
 	echo "--------------------------------------------------------------"
-	echo "[nonos check] WARNING: Devices that conflicts with Linux:"
+	echo "[arm926 check] WARNING: Devices that conflicts with Linux:"
 	cat ${CONFLICT_DEV_LIST}
 	echo "Devices can't normally work.Please select other similar device"
 	echo "--------------------------------------------------------------"
 	rm ${TEMP} ${CONFLICT_DEV_LIST}
 	exit 1
 else
-	echo "[nonos check]info: no conflict dev. is OK!"
+	echo "[arm926 check]info: no conflict dev. is OK!"
 	rm ${TEMP} ${CONFLICT_DEV_LIST}
 fi
 

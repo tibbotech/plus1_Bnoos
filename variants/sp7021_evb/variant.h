@@ -13,6 +13,9 @@
 /* select ext_int.(EXT_INT0--EXT_INT7) */
 //#define EXT_INT_SEL_INSTANCE	0
 
+/* select init STC */
+#define INIT_STC	STC3
+
 #define PIN_SERIAL_TX	GPIO_P1_07
 #define PIN_SERIAL_RX	GPIO_P1_06
 
