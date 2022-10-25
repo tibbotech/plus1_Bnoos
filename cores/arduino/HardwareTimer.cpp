@@ -196,21 +196,23 @@ void HardwareTimer::setCount(uint32_t val, TimerFormat_t format)
 
 	switch(format){
 		case MICROSEC_FORMAT:
-			//u32Count_val = ((val * (getTimerClkFreq() / 1000000)) / Prescalerfactor);
-			u32Count_val = ((((getTimerClkFreq() / 1000) / Prescalerfactor)-1)*val / 1000);
+			/*The timer triger  source is  MHz, so div the 1000 to micro seconds		*/
+			u32Count_val = ((val * (getTimerClkFreq() / 1000)) / Prescalerfactor);
 			break;
 
 		case HERTZ_FORMAT:
-			//u32Count_val = getTimerClkFreq() /(Prescalerfactor*val);
-			u32Count_val = ((((getTimerClkFreq() / 1000) / Prescalerfactor)-1)*1000 / val);
+			/*The Hertz granularity greater than the divided frequency*/
+			u32Count_val = getTimerClkFreq() /(Prescalerfactor*val);
 			break;
-
 		case TICK_FORMAT:
 		default:
 			u32Count_val  = val;
 			break;
 	}
 
+	if (u32Count_val > 1)
+		u32Count_val -= 1;
+	
 	LL_TIM_SetCounter(_timerObj.handle.Instance, u32Count_val);
 	LL_TIM_SetAutoReload(_timerObj.handle.Instance, u32Count_val);
 }
@@ -224,13 +226,11 @@ uint32_t HardwareTimer::getCount(TimerFormat_t format)
 
 	switch(format){
 		case MICROSEC_FORMAT:
-			//return_value = (uint32_t)((count * Prescalerfactor * 1000000) / getTimerClkFreq());
-			return_value = (count * 1000 / (((getTimerClkFreq() / 1000) / Prescalerfactor)-1));
+			return_value = (1000000*count*Prescalerfactor)/getTimerClkFreq();
 			break;
 
 		case HERTZ_FORMAT:
-			//return_value = (uint32_t)(getTimerClkFreq() / (count  * Prescalerfactor));
-			return_value = ((((getTimerClkFreq() / 1000) / Prescalerfactor)-1)*1000 / count);
+			return_value = (uint32_t)(getTimerClkFreq()/(count*Prescalerfactor));
 			break;
 		case TICK_FORMAT:
 		default:
@@ -251,7 +251,7 @@ void HardwareTimer::setOverflow(uint32_t val, TimerFormat_t format )
 
 	switch(format){
 		case MICROSEC_FORMAT:
-			u32Count_val = ((val * (getTimerClkFreq() / 1000000)) / Prescalerfactor);
+			u32Count_val = ((val * (getTimerClkFreq() / 1000)) / Prescalerfactor);
 			break;
 
 		case HERTZ_FORMAT:
